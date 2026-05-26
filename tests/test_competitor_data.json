@@ -1,0 +1,135 @@
+{
+  "competitors": [
+    {
+      "id": "comp_001",
+      "name": "Luxe Downtown Denver",
+      "address": "1200 Market Street, Denver, CO 80202",
+      "distance_miles": 0.5,
+      "pricing": {
+        "studio": 1300,
+        "one_bedroom": 1750,
+        "two_bedroom": 2300,
+        "three_bedroom": 3000
+      },
+      "concessions": [
+        {
+          "type": "first_month_free",
+          "eligible_floorplans": ["studio", "one_bedroom"],
+          "description": "First month free on select units"
+        }
+      ],
+      "google_reviews": {
+        "rating": 3.8,
+        "total_reviews": 142,
+        "recent_themes": {
+          "positive": ["modern_finishes", "great_location", "responsive_maintenance"],
+          "negative": ["high_rent", "noisy_hallways", "slow_leasing"]
+        }
+      },
+      "ad_activity": {
+        "meta_campaigns_active": 5,
+        "primary_messaging": ["luxury_living", "convenience"],
+        "estimated_monthly_spend": 8000,
+        "primary_platforms": ["instagram", "meta_feed"]
+      },
+      "listing_freshness": {
+        "last_updated": "2026-05-25",
+        "units_listed": 4,
+        "platforms": ["zillow", "apartments.com", "zumper"]
+      }
+    },
+    {
+      "id": "comp_002",
+      "name": "Urban Springs Apartments",
+      "address": "1600 South Gaylord Street, Denver, CO 80210",
+      "distance_miles": 1.2,
+      "pricing": {
+        "studio": 1150,
+        "one_bedroom": 1600,
+        "two_bedroom": 2000,
+        "three_bedroom": 2650
+      },
+      "concessions": [
+        {
+          "type": "waived_deposit",
+          "eligible_floorplans": ["all"],
+          "description": "Waived deposit for anyone"
+        },
+        {
+          "type": "move_in_special",
+          "eligible_floorplans": ["two_bedroom", "three_bedroom"],
+          "description": "$200 move-in bonus"
+        }
+      ],
+      "google_reviews": {
+        "rating": 4.2,
+        "total_reviews": 189,
+        "recent_themes": {
+          "positive": ["pet_friendly", "responsive_staff", "good_value"],
+          "negative": ["outdated_finishes", "parking_issues", "small_units"]
+        }
+      },
+      "ad_activity": {
+        "meta_campaigns_active": 3,
+        "primary_messaging": ["affordability", "pet_friendly"],
+        "estimated_monthly_spend": 5000,
+        "primary_platforms": ["craigslist", "facebook"]
+      },
+      "listing_freshness": {
+        "last_updated": "2026-05-24",
+        "units_listed": 7,
+        "platforms": ["craigslist", "zillow", "apartments.com"]
+      }
+    },
+    {
+      "id": "comp_003",
+      "name": "Cherry Creek Modern Living",
+      "address": "250 Columbine Street, Denver, CO 80206",
+      "distance_miles": 2.1,
+      "pricing": {
+        "studio": 1400,
+        "one_bedroom": 1900,
+        "two_bedroom": 2500,
+        "three_bedroom": 3200
+      },
+      "concessions": [],
+      "google_reviews": {
+        "rating": 4.6,
+        "total_reviews": 276,
+        "recent_themes": {
+          "positive": ["amazing_views", "excellent_service", "state_of_art_amenities"],
+          "negative": ["very_expensive", "long_lease_wait"]
+        }
+      },
+      "ad_activity": {
+        "meta_campaigns_active": 8,
+        "primary_messaging": ["luxury", "premium_lifestyle"],
+        "estimated_monthly_spend": 15000,
+        "primary_platforms": ["instagram_reels", "meta_ads", "tiktok"]
+      },
+      "listing_freshness": {
+        "last_updated": "2026-05-26",
+        "units_listed": 2,
+        "platforms": ["apartments.com", "zillow"]
+      }
+    }
+  ],
+  "market_intelligence": {
+    "market": "Denver",
+    "submarket": "South Denver",
+    "competitive_set_avg_pricing": {
+      "studio": 1283,
+      "one_bedroom": 1750,
+      "two_bedroom": 2267,
+      "three_bedroom": 2950
+    },
+    "our_pricing_position": {
+      "studio": "below_market",
+      "one_bedroom": "at_market",
+      "two_bedroom": "below_market",
+      "three_bedroom": "below_market"
+    },
+    "competitor_concession_penetration": 0.67,
+    "market_trend": "stabilizing"
+  }
+}

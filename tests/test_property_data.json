@@ -1,0 +1,268 @@
+{
+  "property": {
+    "id": "prop_12345",
+    "name": "Riverside Luxury Apartments",
+    "address": "1450 Riverside Drive, Denver, CO 80210",
+    "units_total": 250,
+    "property_type": "multifamily_mid_rise",
+    "built_year": 2019
+  },
+  "vacancy_data": {
+    "studio": {
+      "units_available": 5,
+      "units_total": 40,
+      "occupancy_rate": 0.875,
+      "avg_rent": 1200
+    },
+    "one_bedroom": {
+      "units_available": 8,
+      "units_total": 80,
+      "occupancy_rate": 0.90,
+      "avg_rent": 1650
+    },
+    "two_bedroom": {
+      "units_available": 12,
+      "units_total": 100,
+      "occupancy_rate": 0.88,
+      "avg_rent": 2100
+    },
+    "three_bedroom": {
+      "units_available": 3,
+      "units_total": 30,
+      "occupancy_rate": 0.90,
+      "avg_rent": 2800
+    }
+  },
+  "overall_occupancy": 0.885,
+  "priority_floorplans": [
+    {
+      "floorplan": "2-Bedroom",
+      "occupancy": 0.88,
+      "priority_rank": 1,
+      "reason": "Highest vacancy count (12 units)"
+    },
+    {
+      "floorplan": "1-Bedroom",
+      "occupancy": 0.90,
+      "priority_rank": 2,
+      "reason": "8 units vacant"
+    }
+  ],
+  "active_concessions": [
+    {
+      "floorplan": "2-Bedroom",
+      "concession_type": "waived_deposit",
+      "description": "First month deposit waived for leases signed by May 31",
+      "value_dollars": 2100,
+      "active": true
+    }
+  ],
+  "pricing": {
+    "studio": {
+      "market_rate": 1200,
+      "current_offered": 1150,
+      "concession_adjusted": 1150
+    },
+    "one_bedroom": {
+      "market_rate": 1650,
+      "current_offered": 1650,
+      "concession_adjusted": 1650
+    },
+    "two_bedroom": {
+      "market_rate": 2100,
+      "current_offered": 2050,
+      "concession_adjusted": 1950
+    },
+    "three_bedroom": {
+      "market_rate": 2800,
+      "current_offered": 2800,
+      "concession_adjusted": 2800
+    }
+  },
+  "amenities": {
+    "community": [
+      "Resort-style heated pool with cabanas",
+      "24/7 fitness center with yoga studio",
+      "Pet-friendly dog park (2 acres)",
+      "Co-working lounge with high-speed WiFi",
+      "Game room with billiards, ping pong, arcade",
+      "Rooftop terrace with panoramic city views",
+      "Movie theater room with leather recliners",
+      "Community garden and herb wall",
+      "EV charging stations (50+ spots)",
+      "Concierge service 24/7"
+    ],
+    "unit": [
+      "Stainless steel appliances",
+      "Quartz countertops with island",
+      "In-unit washer/dryer",
+      "Walk-in closets (2BR+)",
+      "Private balcony/patio",
+      "Smart home technology (Alexa integration)",
+      "Central air conditioning",
+      "Luxury vinyl plank flooring",
+      "Large windows with city views",
+      "Ceiling fans"
+    ],
+    "services": [
+      "24/7 concierge",
+      "Package receiving room",
+      "Valet parking (paid)",
+      "Pet grooming station",
+      "Bike storage and repair shop"
+    ]
+  },
+  "photos": {
+    "hero_exterior": {
+      "url": "https://example.com/photos/hero_exterior.jpg",
+      "caption": "Modern 5-story building frontage with landscaping",
+      "tags": ["exterior", "building", "day", "landscape"]
+    },
+    "pool_day": {
+      "url": "https://example.com/photos/pool_day.jpg",
+      "caption": "Resort-style pool area with cabanas",
+      "tags": ["amenity", "pool", "outdoor"]
+    },
+    "gym": {
+      "url": "https://example.com/photos/gym.jpg",
+      "caption": "State-of-the-art fitness center",
+      "tags": ["amenity", "fitness", "interior"]
+    },
+    "lobby": {
+      "url": "https://example.com/photos/lobby.jpg",
+      "caption": "Contemporary lobby with high ceilings and natural light",
+      "tags": ["interior", "lobby", "modern"]
+    },
+    "2br_living": {
+      "url": "https://example.com/photos/2br_living.jpg",
+      "caption": "Spacious 2-bedroom living room with large windows",
+      "tags": ["unit", "2bedroom", "living_room"]
+    },
+    "2br_kitchen": {
+      "url": "https://example.com/photos/2br_kitchen.jpg",
+      "caption": "Modern kitchen with stainless steel appliances and island",
+      "tags": ["unit", "2bedroom", "kitchen"]
+    },
+    "1br_bedroom": {
+      "url": "https://example.com/photos/1br_bedroom.jpg",
+      "caption": "Bright 1-bedroom with city views",
+      "tags": ["unit", "1bedroom", "bedroom"]
+    },
+    "dog_park": {
+      "url": "https://example.com/photos/dog_park.jpg",
+      "caption": "Fenced dog park with seating area",
+      "tags": ["amenity", "pet", "outdoor"]
+    },
+    "rooftop": {
+      "url": "https://example.com/photos/rooftop.jpg",
+      "caption": "Rooftop terrace with panoramic city views",
+      "tags": ["amenity", "outdoor", "views"]
+    },
+    "lounge": {
+      "url": "https://example.com/photos/lounge.jpg",
+      "caption": "Co-working lounge with WiFi and seating",
+      "tags": ["amenity", "work", "interior"]
+    }
+  },
+  "local_amenities": {
+    "walkable_distance": {
+      "restaurants": [
+        {
+          "name": "Blue Bottle Coffee",
+          "category": "coffee_shop",
+          "distance_minutes": 2,
+          "rating": 4.7
+        },
+        {
+          "name": "Chez Laurent Restaurant",
+          "category": "fine_dining",
+          "distance_minutes": 5,
+          "rating": 4.6
+        },
+        {
+          "name": "Taco Bell",
+          "category": "fast_casual",
+          "distance_minutes": 3,
+          "rating": 4.0
+        },
+        {
+          "name": "Whole Foods Market",
+          "category": "grocery",
+          "distance_minutes": 5,
+          "rating": 4.5
+        }
+      ],
+      "parks": [
+        {
+          "name": "Riverside Park",
+          "distance_minutes": 3,
+          "amenities": ["dog_park", "playground", "jogging_trail", "picnic_area"]
+        },
+        {
+          "name": "Central Green Park",
+          "distance_minutes": 8,
+          "amenities": ["basketball_court", "soccer_field", "walking_path"]
+        }
+      ],
+      "transit": [
+        {
+          "type": "metro_station",
+          "name": "Riverside Metro Station",
+          "distance_minutes": 4,
+          "lines": ["Line A", "Line C"]
+        },
+        {
+          "type": "bus_stop",
+          "name": "Riverside & 15th Ave",
+          "distance_minutes": 1,
+          "routes": ["Line 7", "Line 42"]
+        }
+      ],
+      "shopping": [
+        {
+          "name": "Target",
+          "distance_minutes": 6,
+          "category": "department_store"
+        },
+        {
+          "name": "Colorado Boutique District",
+          "distance_minutes": 2,
+          "category": "local_shops"
+        }
+      ],
+      "entertainment": [
+        {
+          "name": "Movie Theater Complex",
+          "distance_minutes": 7,
+          "screens": 12
+        },
+        {
+          "name": "Nightlife District - LoDo",
+          "distance_minutes": 10,
+          "type": "bar_scene"
+        }
+      ],
+      "schools": [
+        {
+          "name": "Lincoln Elementary School",
+          "distance_minutes": 5,
+          "type": "public",
+          "rating": 8.5
+        },
+        {
+          "name": "Jefferson Middle School",
+          "distance_minutes": 8,
+          "type": "public",
+          "rating": 8.2
+        }
+      ]
+    }
+  },
+  "market_context": {
+    "market": "Denver",
+    "submarket": "South Denver",
+    "market_rent_growth_yoy": 0.032,
+    "market_occupancy": 0.91,
+    "days_on_market_avg": 18
+  }
+}

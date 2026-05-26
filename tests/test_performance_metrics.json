@@ -1,0 +1,199 @@
+{
+  "campaign_metrics": {
+    "period": "2026-05-19_to_2026-05-26",
+    "campaigns": [
+      {
+        "campaign_id": "meta_2bed_family_001",
+        "variant_id": "var_family_001",
+        "platform": "meta",
+        "floorplan": "2-Bedroom",
+        "emotional_lever": "move_in_ease",
+        "spend": 450,
+        "impressions": 18500,
+        "reach": 12300,
+        "clicks": 385,
+        "ctr": 0.0208,
+        "leads": 47,
+        "cost_per_lead": 9.57,
+        "tours_booked": 12,
+        "cost_per_tour": 37.5,
+        "applications": 4,
+        "leases_signed": 2,
+        "cost_per_lease": 225,
+        "revenue_generated": 50400,
+        "status": "active",
+        "placements": {
+          "feed": 0.45,
+          "reels": 0.35,
+          "stories": 0.20
+        }
+      },
+      {
+        "campaign_id": "insta_1bed_pro_002",
+        "variant_id": "var_pro_001",
+        "platform": "instagram",
+        "floorplan": "1-Bedroom",
+        "emotional_lever": "convenience",
+        "spend": 320,
+        "impressions": 14200,
+        "reach": 9800,
+        "clicks": 428,
+        "ctr": 0.0301,
+        "leads": 38,
+        "cost_per_lead": 8.42,
+        "tours_booked": 11,
+        "cost_per_tour": 29.09,
+        "applications": 5,
+        "leases_signed": 3,
+        "cost_per_lease": 106.67,
+        "revenue_generated": 49500,
+        "status": "active",
+        "placement_type": "reel"
+      },
+      {
+        "campaign_id": "craigslist_studio_budget_003",
+        "variant_id": "var_budget_001",
+        "platform": "craigslist",
+        "floorplan": "Studio",
+        "emotional_lever": "affordability",
+        "spend": 150,
+        "impressions": null,
+        "reach": 8500,
+        "clicks": 312,
+        "ctr": null,
+        "leads": 28,
+        "cost_per_lead": 5.36,
+        "tours_booked": 9,
+        "cost_per_tour": 16.67,
+        "applications": 4,
+        "leases_signed": 2,
+        "cost_per_lease": 75,
+        "revenue_generated": 27600,
+        "status": "active",
+        "placement_type": "listing"
+      },
+      {
+        "campaign_id": "tiktok_1bed_pro_004",
+        "variant_id": "var_pro_tiktok_001",
+        "platform": "tiktok",
+        "floorplan": "1-Bedroom",
+        "emotional_lever": "convenience",
+        "spend": 200,
+        "impressions": 89000,
+        "reach": 42000,
+        "clicks": 245,
+        "ctr": 0.00275,
+        "leads": 12,
+        "cost_per_lead": 16.67,
+        "tours_booked": 2,
+        "cost_per_tour": 100,
+        "applications": 0,
+        "leases_signed": 0,
+        "cost_per_lease": null,
+        "revenue_generated": 0,
+        "status": "active",
+        "note": "High reach but low conversion - consider creative refresh"
+      }
+    ],
+    "aggregate_metrics": {
+      "total_spend": 1120,
+      "total_impressions": 121700,
+      "total_reach": 72600,
+      "total_clicks": 1370,
+      "total_leads": 125,
+      "avg_cpl": 8.96,
+      "total_tours": 34,
+      "avg_cpt": 32.94,
+      "total_applications": 13,
+      "total_leases": 7,
+      "avg_cpl_overall": 160,
+      "total_revenue": 127500,
+      "roas": 113.84
+    },
+    "performance_by_lever": {
+      "move_in_ease": {
+        "spend": 450,
+        "leads": 47,
+        "cpl": 9.57,
+        "tours": 12,
+        "cpt": 37.5,
+        "leases": 2,
+        "performance_rank": 2
+      },
+      "convenience": {
+        "spend": 520,
+        "leads": 50,
+        "cpl": 10.4,
+        "tours": 13,
+        "cpt": 40,
+        "leases": 3,
+        "performance_rank": 1
+      },
+      "affordability": {
+        "spend": 150,
+        "leads": 28,
+        "cpl": 5.36,
+        "tours": 9,
+        "cpt": 16.67,
+        "leases": 2,
+        "performance_rank": 1
+      }
+    },
+    "performance_by_platform": {
+      "meta": {
+        "platform": "meta",
+        "spend": 450,
+        "leads": 47,
+        "cpl": 9.57,
+        "tours": 12,
+        "cpt": 37.5,
+        "efficiency_rank": 2
+      },
+      "instagram": {
+        "platform": "instagram",
+        "spend": 320,
+        "leads": 38,
+        "cpl": 8.42,
+        "tours": 11,
+        "cpt": 29.09,
+        "efficiency_rank": 1
+      },
+      "craigslist": {
+        "platform": "craigslist",
+        "spend": 150,
+        "leads": 28,
+        "cpl": 5.36,
+        "tours": 9,
+        "cpt": 16.67,
+        "efficiency_rank": 1
+      },
+      "tiktok": {
+        "platform": "tiktok",
+        "spend": 200,
+        "leads": 12,
+        "cpl": 16.67,
+        "tours": 2,
+        "cpt": 100,
+        "efficiency_rank": 4,
+        "note": "Underperforming - high reach but low conversion"
+      }
+    },
+    "insights": {
+      "top_performers": [
+        "Craigslist affordability campaigns - lowest CPL at $5.36",
+        "Instagram convenience campaigns - best CPT at $29.09",
+        "Move-in-ease lever converting family personas effectively"
+      ],
+      "underperformers": [
+        "TikTok campaigns - 100 CPT, needs creative refresh",
+        "Meta feed placements underperforming vs Reels"
+      ],
+      "optimization_recommendations": [
+        "Shift 30% budget from TikTok to Instagram Reels (proven 3.4x better CPT)",
+        "Increase Craigslist budget for affordability positioning",
+        "Test new creative for TikTok targeting different age demographic",
+        "Double down on convenience lever - outperforming other levers 2:1"
+      ]
+    }
+  }
+}

@@ -1,0 +1,277 @@
+{
+  "visual_packages": [
+    {
+      "brief_id": "brief_001",
+      "floorplan": "2-Bedroom",
+      "emotional_lever": "move_in_ease",
+      "visual_tone": "warm_cozy",
+      "photo_selections": [
+        {
+          "photo_id": "2br_living",
+          "reason": "Spacious, welcoming, shows move-in ready unit",
+          "text_overlay": "Move In This Weekend",
+          "text_position": "bottom",
+          "text_size": "large"
+        },
+        {
+          "photo_id": "lobby",
+          "reason": "Shows contemporary, clean entrance - professional impression",
+          "text_overlay": "Approved in 24 Hours",
+          "text_position": "top",
+          "text_size": "medium"
+        },
+        {
+          "photo_id": "dog_park",
+          "reason": "Family-friendly amenity with children/pets",
+          "text_overlay": "Perfect for Families",
+          "text_position": "bottom",
+          "text_size": "large"
+        }
+      ],
+      "carousel_structure": {
+        "slide_count": 4,
+        "slides": [
+          {
+            "slide_number": 1,
+            "photo": "2br_living",
+            "text": "Move In This Weekend",
+            "description": "Hero shot - spacious, bright living room",
+            "design_notes": "Warm filter, inviting"
+          },
+          {
+            "slide_number": 2,
+            "photo": "2br_kitchen",
+            "text": "Modern Finishes. Family Ready.",
+            "description": "Kitchen and dining area",
+            "design_notes": "Highlight appliances and counter space"
+          },
+          {
+            "slide_number": 3,
+            "photo": "dog_park",
+            "text": "Your Family Will Love It",
+            "description": "Dog park and community amenities",
+            "design_notes": "Warm, welcoming tone"
+          },
+          {
+            "slide_number": 4,
+            "photo": "hero_exterior",
+            "text": "Apply Today - Move This Month",
+            "description": "CTA slide with building shot",
+            "design_notes": "Urgency + action"
+          }
+        ]
+      },
+      "video_script": {
+        "platform": "instagram_reels",
+        "duration_seconds": 25,
+        "music_mood": "upbeat_friendly",
+        "shots": [
+          {
+            "shot_number": 1,
+            "duration": "0-3s",
+            "description": "Hero shot: Pan across living room, bright sunlight",
+            "text_overlay": "Your New Home",
+            "transition": "fade_in"
+          },
+          {
+            "shot_number": 2,
+            "duration": "3-10s",
+            "description": "Quick cuts: kitchen island, bedroom, balcony views",
+            "text_overlay": "Modern. Spacious. Ready.",
+            "transition": "quick_cuts"
+          },
+          {
+            "shot_number": 3,
+            "duration": "10-18s",
+            "description": "Family moments: children in dog park, playing in lobby",
+            "text_overlay": "Perfect for Families",
+            "transition": "swipe"
+          },
+          {
+            "shot_number": 4,
+            "duration": "18-25s",
+            "description": "Building exterior, sun setting",
+            "text_overlay": "Approved in 24 Hours | Move This Weekend",
+            "transition": "zoom_in",
+            "cta": "Tap to Apply →"
+          }
+        ]
+      },
+      "visual_tone": {
+        "color_palette": "warm_naturals",
+        "primary_colors": ["warm_white", "natural_wood", "soft_gold"],
+        "overall_feel": "warm_cozy",
+        "energy_level": "calm_inviting"
+      },
+      "platform_formats": [
+        {
+          "platform": "meta_feed",
+          "format": "1.91:1",
+          "recommended": true
+        },
+        {
+          "platform": "instagram_feed",
+          "format": "4:5",
+          "recommended": true
+        },
+        {
+          "platform": "instagram_reel",
+          "format": "9:16",
+          "recommended": true
+        }
+      ]
+    },
+    {
+      "brief_id": "brief_002",
+      "floorplan": "1-Bedroom",
+      "emotional_lever": "convenience",
+      "visual_tone": "modern_sleek",
+      "photo_selections": [
+        {
+          "photo_id": "1br_bedroom",
+          "reason": "Modern, bright, city views emphasize location convenience",
+          "text_overlay": "10 Min to Downtown",
+          "text_position": "top",
+          "text_size": "large"
+        },
+        {
+          "photo_id": "rooftop",
+          "reason": "City view emphasizes walkability and urban lifestyle",
+          "text_overlay": "Walk to Everything",
+          "text_position": "bottom",
+          "text_size": "large"
+        }
+      ],
+      "carousel_structure": {
+        "slide_count": 5,
+        "slides": [
+          {
+            "slide_number": 1,
+            "photo": "1br_bedroom",
+            "text": "10 Minutes to Downtown",
+            "description": "Unit with city views",
+            "design_notes": "Modern, energetic"
+          },
+          {
+            "slide_number": 2,
+            "photo": "rooftop",
+            "text": "Your Nightlife Awaits",
+            "description": "Rooftop terrace with views",
+            "design_notes": "Aspirational, energetic"
+          },
+          {
+            "slide_number": 3,
+            "photo": "lounge",
+            "text": "Co-work. Chill. Connect.",
+            "description": "Co-working space",
+            "design_notes": "Modern lifestyle"
+          },
+          {
+            "slide_number": 4,
+            "photo": "gym",
+            "text": "Everything You Need",
+            "description": "Fitness center",
+            "design_notes": "Energy and vitality"
+          },
+          {
+            "slide_number": 5,
+            "photo": "hero_exterior",
+            "text": "Live Where You Want to Be",
+            "description": "CTA with building",
+            "design_notes": "Aspiration + action"
+          }
+        ]
+      },
+      "video_script": {
+        "platform": "tiktok",
+        "duration_seconds": 20,
+        "music_mood": "energetic_modern",
+        "shots": [
+          {
+            "shot_number": 1,
+            "duration": "0-2s",
+            "description": "Quick zoom into bedroom window showing city lights",
+            "text_overlay": "Your View",
+            "transition": "zoom"
+          },
+          {
+            "shot_number": 2,
+            "duration": "2-8s",
+            "description": "Fast cuts: metro station, coffee shop, office building, nightlife",
+            "text_overlay": "10 Min Walk to",
+            "transition": "quick_cuts"
+          },
+          {
+            "shot_number": 3,
+            "duration": "8-15s",
+            "description": "Young professional getting ready, walking through city",
+            "text_overlay": "Your Lifestyle",
+            "transition": "swipe"
+          },
+          {
+            "shot_number": 4,
+            "duration": "15-20s",
+            "description": "Building entrance with person entering",
+            "text_overlay": "Available Now",
+            "transition": "fade",
+            "cta": "Link in Bio →"
+          }
+        ]
+      },
+      "visual_tone": {
+        "color_palette": "modern_bold",
+        "primary_colors": ["dark_gray", "gold_accent", "white"],
+        "overall_feel": "modern_sleek",
+        "energy_level": "energetic"
+      }
+    },
+    {
+      "brief_id": "brief_003",
+      "floorplan": "Studio",
+      "emotional_lever": "affordability",
+      "visual_tone": "bright_airy",
+      "photo_selections": [
+        {
+          "photo_id": "2br_living",
+          "reason": "Shows spacious feeling despite compact size",
+          "text_overlay": "$1,150/Month",
+          "text_position": "bottom",
+          "text_size": "large"
+        }
+      ],
+      "carousel_structure": {
+        "slide_count": 3,
+        "slides": [
+          {
+            "slide_number": 1,
+            "photo": "2br_living",
+            "text": "Studio - Only $1,150",
+            "description": "Bright, spacious unit",
+            "design_notes": "Maximize space feeling"
+          },
+          {
+            "slide_number": 2,
+            "photo": "pool",
+            "text": "Luxury Amenities Included",
+            "description": "Premium pool area",
+            "design_notes": "Value message"
+          },
+          {
+            "slide_number": 3,
+            "photo": "hero_exterior",
+            "text": "Premium Living. Smart Price.",
+            "description": "Building with CTA",
+            "design_notes": "Smart, empowered tone"
+          }
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "briefs_covered": 3,
+    "formats_produced": 8,
+    "video_scripts_count": 2,
+    "carousel_count": 3,
+    "visual_packages_ready": true
+  }
+}

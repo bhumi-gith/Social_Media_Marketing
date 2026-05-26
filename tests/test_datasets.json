@@ -1,0 +1,581 @@
+{
+  "description": "Test datasets for LeafMesh apartment marketing mesh. Based on Century 21 property listing structure.",
+  "property_info": {
+    "property_id": "prop-mills-ave-dc",
+    "property_name": "Mills Avenue Apartments",
+    "address": "2841 Mills Ave NE",
+    "city": "Washington",
+    "state": "DC",
+    "zip": "20018",
+    "property_type": "multifamily_apartment",
+    "year_built": 1998,
+    "total_units": 48,
+    "management_company": "Langdon Park Management",
+    "pms_system": "Yardi"
+  },
+  "test_case_1_happy_path": {
+    "name": "Happy Path - Normal Campaign Flow",
+    "scenario": "Standard daily cycle with healthy occupancy",
+    "request_body": {
+      "message": "Daily marketing pipeline execution",
+      "type": "test",
+      "entry_point": "marketing_pipeline",
+      "session_id": "session-tc1-001",
+      "property_ids": "prop-mills-ave-dc",
+      "daily_budget": 500
+    },
+    "expected_data_ingest_output": {
+      "vacancy_by_floorplan": {
+        "studio": 0.15,
+        "1br": 0.22,
+        "2br": 0.18,
+        "3br": 0.25
+      },
+      "current_pricing": {
+        "studio": 1850,
+        "1br": 2200,
+        "2br": 2800,
+        "3br": 3400
+      },
+      "active_concessions": "First month 50% off for new leases signed before June 30, 2026",
+      "occupancy_rate": 80.5,
+      "priority_floorplans": [
+        {
+          "floorplan": "3br",
+          "occupancy": 0.75,
+          "vacancy": 0.25,
+          "priority": 1,
+          "reason": "Lowest occupancy - highest marketing opportunity"
+        },
+        {
+          "floorplan": "1br",
+          "occupancy": 0.78,
+          "vacancy": 0.22,
+          "priority": 2
+        },
+        {
+          "floorplan": "2br",
+          "occupancy": 0.82,
+          "vacancy": 0.18,
+          "priority": 3
+        },
+        {
+          "floorplan": "studio",
+          "occupancy": 0.85,
+          "vacancy": 0.15,
+          "priority": 4
+        }
+      ],
+      "local_amenities": {
+        "parks": [
+          {
+            "name": "Langdon Park",
+            "distance_minutes": 1,
+            "features": ["Sports fields", "Basketball courts", "Outdoor pool", "Picnic areas", "Walking trails"]
+          },
+          {
+            "name": "Brookland Park",
+            "distance_minutes": 8,
+            "features": ["Dog park", "Playground", "Tennis courts"]
+          }
+        ],
+        "shopping": [
+          {
+            "name": "Rhode Island Avenue Shops",
+            "distance_minutes": 5,
+            "stores": ["Whole Foods", "Best Buy", "Target", "Local boutiques", "Restaurants"]
+          },
+          {
+            "name": "Shops at Langdon Park",
+            "distance_minutes": 3,
+            "stores": ["CVS Pharmacy", "Subway", "Café"]
+          }
+        ],
+        "transit": [
+          {
+            "type": "Metro Station",
+            "name": "Langdon Park-Woodridge Metro",
+            "distance_minutes": 7,
+            "lines": ["Red Line"]
+          },
+          {
+            "type": "Bus Stops",
+            "name": "Multiple nearby",
+            "distance_minutes": 2
+          }
+        ],
+        "dining": [
+          {
+            "name": "Blue Bottle Coffee",
+            "distance_minutes": 4,
+            "cuisine": "Coffee & Pastry"
+          },
+          {
+            "name": "Trader Joe's",
+            "distance_minutes": 3,
+            "cuisine": "Grocery/Prepared Foods"
+          }
+        ],
+        "entertainment": [
+          {
+            "name": "Columbia Heights Library",
+            "distance_minutes": 6,
+            "type": "Public Library"
+          },
+          {
+            "name": "Regal Cinemas",
+            "distance_minutes": 12,
+            "type": "Movie Theater"
+          }
+        ]
+      },
+      "property_photos": [
+        {
+          "photo_id": "mills-001",
+          "type": "exterior_building",
+          "description": "Modern facade - newly renovated brick exterior",
+          "url": "https://images.property.com/mills-001.jpg",
+          "tags": ["exterior", "daytime", "landscape"]
+        },
+        {
+          "photo_id": "mills-002",
+          "type": "entrance",
+          "description": "Main entrance with landscaping and covered awning",
+          "url": "https://images.property.com/mills-002.jpg",
+          "tags": ["entrance", "professional", "welcoming"]
+        },
+        {
+          "photo_id": "mills-003",
+          "type": "lobby",
+          "description": "Modern lobby with contemporary furniture and lighting",
+          "url": "https://images.property.com/mills-003.jpg",
+          "tags": ["interior", "common_area", "modern"]
+        },
+        {
+          "photo_id": "mills-004",
+          "type": "amenity_fitness",
+          "description": "Fully equipped fitness center with cardio and strength equipment",
+          "url": "https://images.property.com/mills-004.jpg",
+          "tags": ["amenity", "fitness", "wellness"]
+        },
+        {
+          "photo_id": "mills-005",
+          "type": "amenity_pool",
+          "description": "Rooftop pool with city views",
+          "url": "https://images.property.com/mills-005.jpg",
+          "tags": ["amenity", "recreation", "lifestyle"]
+        },
+        {
+          "photo_id": "mills-006",
+          "type": "unit_1br",
+          "description": "1-bedroom kitchen - modern appliances, open layout",
+          "url": "https://images.property.com/mills-006.jpg",
+          "tags": ["unit", "1br", "kitchen"]
+        },
+        {
+          "photo_id": "mills-007",
+          "type": "unit_1br_living",
+          "description": "1-bedroom living room - bright, airy, hardwood floors",
+          "url": "https://images.property.com/mills-007.jpg",
+          "tags": ["unit", "1br", "living_room"]
+        },
+        {
+          "photo_id": "mills-008",
+          "type": "unit_2br",
+          "description": "2-bedroom master bedroom with ensuite bathroom",
+          "url": "https://images.property.com/mills-008.jpg",
+          "tags": ["unit", "2br", "bedroom"]
+        },
+        {
+          "photo_id": "mills-009",
+          "type": "unit_2br_kitchen",
+          "description": "2-bedroom kitchen with island and stainless steel appliances",
+          "url": "https://images.property.com/mills-009.jpg",
+          "tags": ["unit", "2br", "kitchen"]
+        },
+        {
+          "photo_id": "mills-010",
+          "type": "unit_bathroom",
+          "description": "Modern bathroom with marble counters and walk-in shower",
+          "url": "https://images.property.com/mills-010.jpg",
+          "tags": ["unit", "bathroom", "luxury"]
+        },
+        {
+          "photo_id": "mills-011",
+          "type": "parking",
+          "description": "Covered parking garage with EV charging",
+          "url": "https://images.property.com/mills-011.jpg",
+          "tags": ["amenity", "parking", "modern"]
+        },
+        {
+          "photo_id": "mills-012",
+          "type": "pet_area",
+          "description": "Pet park with dog play area and agility equipment",
+          "url": "https://images.property.com/mills-012.jpg",
+          "tags": ["amenity", "pet", "recreation"]
+        },
+        {
+          "photo_id": "mills-013",
+          "type": "lounge",
+          "description": "Social lounge with entertainment system and seating",
+          "url": "https://images.property.com/mills-013.jpg",
+          "tags": ["amenity", "common_area", "social"]
+        },
+        {
+          "photo_id": "mills-014",
+          "type": "coworking",
+          "description": "Co-working space with high-speed internet",
+          "url": "https://images.property.com/mills-014.jpg",
+          "tags": ["amenity", "work", "modern"]
+        },
+        {
+          "photo_id": "mills-015",
+          "type": "courtyard",
+          "description": "Central courtyard with seating and landscaping",
+          "url": "https://images.property.com/mills-015.jpg",
+          "tags": ["exterior", "common_area", "green_space"]
+        }
+      ],
+      "amenity_list": [
+        {
+          "category": "Fitness & Wellness",
+          "amenities": [
+            "24/7 Fitness Center",
+            "Yoga Studio",
+            "Sauna",
+            "Steam Room"
+          ]
+        },
+        {
+          "category": "Recreation",
+          "amenities": [
+            "Rooftop Pool",
+            "Pet Park",
+            "Game Room",
+            "Lounge Seating"
+          ]
+        },
+        {
+          "category": "Smart Living",
+          "amenities": [
+            "Smart Home Technology",
+            "High-Speed Internet (1GB)",
+            "Smart Locks",
+            "In-Unit Washer/Dryer"
+          ]
+        },
+        {
+          "category": "Services",
+          "amenities": [
+            "24-Hour Concierge",
+            "Package Management",
+            "Bike Storage",
+            "EV Charging"
+          ]
+        },
+        {
+          "category": "Unit Features",
+          "amenities": [
+            "Stainless Steel Appliances",
+            "Granite Countertops",
+            "Hardwood Floors",
+            "Walk-In Closets",
+            "Private Balcony"
+          ]
+        }
+      ]
+    }
+  },
+  "test_case_2_low_occupancy": {
+    "name": "Test Case 2 - Concession Trigger",
+    "scenario": "Low occupancy triggers concession_gate - 3BR and 1BR under 80%",
+    "request_body": {
+      "message": "Low occupancy alert - trigger concessions",
+      "type": "test",
+      "entry_point": "marketing_pipeline",
+      "session_id": "session-tc2-001",
+      "property_ids": "prop-mills-ave-dc",
+      "occupancy_rate": 68.5,
+      "vacancy_by_floorplan": {
+        "studio": 0.85,
+        "1br": 0.60,
+        "2br": 0.72,
+        "3br": 0.55
+      },
+      "daily_budget": 750
+    },
+    "expected_concession_gate_output": {
+      "concession_triggered": true,
+      "triggered_floorplans": ["3br", "1br"],
+      "concession_type": "first_month_free",
+      "concession_severity": "aggressive",
+      "occupancy_at_trigger": 68.5,
+      "deactivation_recommended": false,
+      "details": {
+        "3br_occupancy": 0.55,
+        "1br_occupancy": 0.60,
+        "threshold": 0.80,
+        "recommended_incentive": "First month free + $200 move-in credit"
+      }
+    }
+  },
+  "test_case_3_healthy_occupancy": {
+    "name": "Test Case 3 - Healthy Occupancy",
+    "scenario": "All floorplans above 85% occupancy - no concessions needed",
+    "request_body": {
+      "message": "Healthy occupancy - maintain premium positioning",
+      "type": "test",
+      "entry_point": "marketing_pipeline",
+      "session_id": "session-tc3-001",
+      "property_ids": "prop-mills-ave-dc",
+      "occupancy_rate": 91.2,
+      "vacancy_by_floorplan": {
+        "studio": 0.95,
+        "1br": 0.88,
+        "2br": 0.92,
+        "3br": 0.87
+      },
+      "daily_budget": 400
+    },
+    "expected_outcomes": {
+      "concession_triggered": false,
+      "strategy_focus": ["Premium positioning", "Lifestyle marketing", "Amenity highlights"],
+      "messaging_levers": ["local_lifestyle", "convenience", "move_in_ease"]
+    }
+  },
+  "test_case_4_competitor_pricing": {
+    "name": "Test Case 4 - Competitor Intelligence",
+    "scenario": "Competitor nearby with aggressive pricing strategy",
+    "competitor_properties": [
+      {
+        "competitor_id": "comp-001",
+        "name": "Riverside Apartments",
+        "address": "2900 Mills Ave NE (same block)",
+        "pricing": {
+          "studio": 1650,
+          "1br": 1950,
+          "2br": 2450,
+          "3br": 2950
+        },
+        "concessions": "2 months free for 13-month lease",
+        "google_rating": 3.8,
+        "reviews_count": 247,
+        "common_complaints": [
+          "Slow maintenance response",
+          "Parking issues",
+          "Noise complaints"
+        ],
+        "common_praise": [
+          "Great location",
+          "Beautiful rooftop",
+          "Responsive management"
+        ]
+      }
+    ],
+    "expected_strategy_adjustment": {
+      "positioning": "Emphasize faster maintenance response, superior parking, quieter units",
+      "pricing_strategy": "Don't compete on price - highlight amenities and service quality",
+      "marketing_angle": "Operational excellence, responsive management, quality of life"
+    }
+  },
+  "test_case_5_performance_analysis": {
+    "name": "Test Case 5 - Performance Engine Analysis",
+    "scenario": "Campaign performance from past week - identify winners and losers",
+    "published_campaigns": [
+      {
+        "campaign_id": "cam-001",
+        "name": "Urban Lifestyle - Instagram Reels",
+        "variant_ids": ["var-001", "var-002", "var-003"],
+        "platform": "instagram_reels",
+        "emotional_lever": "local_lifestyle",
+        "spend": 150,
+        "metrics": {
+          "impressions": 12400,
+          "clicks": 520,
+          "ctr": 0.042,
+          "leads": 48,
+          "cost_per_lead": 3.13,
+          "tours_booked": 18,
+          "cost_per_tour": 8.33,
+          "applications": 5,
+          "leases_signed": 2
+        }
+      },
+      {
+        "campaign_id": "cam-002",
+        "name": "Affordability - Meta Feed",
+        "variant_ids": ["var-004", "var-005"],
+        "platform": "meta_ads_feed",
+        "emotional_lever": "affordability",
+        "spend": 200,
+        "metrics": {
+          "impressions": 18900,
+          "clicks": 380,
+          "ctr": 0.02,
+          "leads": 32,
+          "cost_per_lead": 6.25,
+          "tours_booked": 4,
+          "cost_per_tour": 50,
+          "applications": 0,
+          "leases_signed": 0
+        }
+      },
+      {
+        "campaign_id": "cam-003",
+        "name": "Convenience/Amenities - TikTok",
+        "variant_ids": ["var-006", "var-007", "var-008"],
+        "platform": "tiktok",
+        "emotional_lever": "convenience",
+        "spend": 150,
+        "metrics": {
+          "impressions": 45000,
+          "clicks": 1200,
+          "ctr": 0.0267,
+          "leads": 92,
+          "cost_per_lead": 1.63,
+          "tours_booked": 28,
+          "cost_per_tour": 5.36,
+          "applications": 12,
+          "leases_signed": 4
+        }
+      }
+    ],
+    "expected_performance_output": {
+      "top_performer": {
+        "campaign": "cam-003 (TikTok/Convenience)",
+        "reason": "Lowest CPL ($1.63), Lowest CPT ($5.36), highest lease conversion (4)"
+      },
+      "underperformer": {
+        "campaign": "cam-002 (Meta/Affordability)",
+        "reason": "High CPL ($6.25), Very high CPT ($50), Zero leases, High spend inefficiency"
+      },
+      "optimization_brief": "TikTok convenience messaging is 3x more efficient than Meta affordability. Shift 50% of budget from cam-002 to expand cam-003. Instagram Reels also outperforming (CPT $8.33). Pause affordability messaging for 72 hours to evaluate market shift.",
+      "budget_recommendation": {
+        "increase": "cam-003 (TikTok) - +50%",
+        "maintain": "cam-001 (Instagram) - continue",
+        "pause": "cam-002 (Meta affordability) - 72-hour hold"
+      }
+    }
+  },
+  "test_case_6_fair_housing_violations": {
+    "name": "Test Case 6 - Fair Housing Compliance",
+    "scenario": "Copywriter catches Fair Housing violations in generated copy",
+    "campaign_brief": {
+      "target_floorplan": "2br",
+      "persona": "family",
+      "emotional_lever": "family_friendly",
+      "messaging_direction": "Focus on quality of life for growing families"
+    },
+    "test_violations": [
+      {
+        "violation_id": "v-001",
+        "text": "Perfect for families with young children - safe family neighborhood",
+        "violation_type": "Familial Status",
+        "severity": "CRITICAL",
+        "reason": "Cannot advertise as 'perfect for families' - implies familial status preference"
+      },
+      {
+        "violation_id": "v-002",
+        "text": "Great for professionals who value success",
+        "violation_type": "National Origin / Occupation Targeting",
+        "severity": "CRITICAL",
+        "reason": "Cannot target 'professionals' - implies socioeconomic/occupation preferences"
+      },
+      {
+        "violation_id": "v-003",
+        "text": "Located in the best ethnic neighborhood",
+        "violation_type": "National Origin / Race",
+        "severity": "CRITICAL",
+        "reason": "Cannot mention ethnicity of neighborhood - fair housing violation"
+      }
+    ],
+    "expected_output": {
+      "fair_housing_violations": 3,
+      "blocks_human_approval": true,
+      "reason": "Cannot proceed to human_approval when violations present",
+      "copywriter_action": "Return to copywriter for regeneration without violations",
+      "compliant_rewrites": [
+        "Perfect for renters seeking a vibrant, walkable community",
+        "Great for renters who value career development and community",
+        "Located in a dynamic neighborhood with diverse dining and entertainment"
+      ]
+    }
+  },
+  "test_case_7_hitl_feedback_loop": {
+    "name": "Test Case 7 - HITL Feedback & Regeneration",
+    "scenario": "Human approver requests visual regeneration - feedback loop back to visual_creator",
+    "human_approval_request": {
+      "approval_status": "regenerate_visuals",
+      "editor_notes": "The 3BR carousel needs warmer colors - these feel too modern/cold for family positioning. Also, the video script seems too fast-paced for the family audience. Can we make it more warm and inviting?",
+      "briefs_approved": 0,
+      "reviewer_name": "Sarah Chen",
+      "review_timestamp": "2026-05-25T14:32:00Z"
+    },
+    "expected_flow": {
+      "routing": "human_approval → visual_creator (feedback loop)",
+      "visual_creator_receives": {
+        "editor_notes": "warmer colors, more inviting, slower pacing",
+        "target_brief": "3BR family-focused campaign",
+        "regenerate_visual_tone": "warm_cozy instead of modern_sleek",
+        "video_pacing": "slower, more deliberate transitions"
+      },
+      "visual_creator_returns": "New visual packages with warm tones, family-oriented imagery",
+      "next_step": "Back to human_approval for re-review"
+    }
+  },
+  "test_case_8_high_budget_cycle": {
+    "name": "Test Case 8 - High-Budget Campaign Cycle",
+    "scenario": "Large budget allocation - test system scalability",
+    "request_body": {
+      "message": "Quarterly high-budget push - aggressive occupancy target",
+      "type": "test",
+      "entry_point": "marketing_pipeline",
+      "session_id": "session-tc8-001",
+      "property_ids": "prop-mills-ave-dc",
+      "daily_budget": 2000,
+      "occupancy_rate": 65,
+      "vacancy_by_floorplan": {
+        "studio": 0.70,
+        "1br": 0.60,
+        "2br": 0.62,
+        "3br": 0.55
+      }
+    },
+    "expected_campaign_strategist_output": {
+      "briefs_count": 3,
+      "total_budget_allocated": 1900,
+      "briefs": [
+        {
+          "brief_id": 1,
+          "target_floorplan": "3br",
+          "persona": "family",
+          "emotional_lever": "move_in_ease",
+          "budget": 700,
+          "platforms": ["meta_ads", "instagram_reels"]
+        },
+        {
+          "brief_id": 2,
+          "target_floorplan": "1br",
+          "persona": "young_professional",
+          "emotional_lever": "convenience",
+          "budget": 600,
+          "platforms": ["tiktok", "meta_ads"]
+        },
+        {
+          "brief_id": 3,
+          "target_floorplan": "2br",
+          "persona": "relocator",
+          "emotional_lever": "local_lifestyle",
+          "budget": 600,
+          "platforms": ["instagram_reels", "zumper"]
+        }
+      ]
+    },
+    "assertions": {
+      "total_budget_not_exceeded": 1900 <= 2000,
+      "briefs_count_between_2_and_3": 3,
+      "each_brief_unique_lever": true,
+      "budget_allocated_to_all_briefs": true
+    }
+  }
+}

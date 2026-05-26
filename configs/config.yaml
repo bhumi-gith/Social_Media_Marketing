@@ -1,0 +1,721 @@
+name: leasing_marketing_mesh
+version: 2.0.0
+architecture: managed_mesh
+environment: development
+debug: true
+log_level: INFO
+redis:
+  password: ''
+  session_ttl: 7200
+  host: localhost
+  port: 6379
+auto_discover:
+  directory: agency
+  pattern: '*_agent.py'
+  recursive: false
+manager:
+  coordination_rules:
+    human_input_rules:
+      max_concurrent_requests: 3
+      max_agent_requests: 5
+      enable_request_queuing: true
+    timeout_rules:
+      max_timeouts_before_escalation: 2
+      timeout_escalation_enabled: true
+      escalation_notify_managers: true
+    workflow_pause_rules:
+      max_pause_duration_minutes: 30
+      max_concurrent_paused_workflows: 2
+      pause_monitoring_enabled: true
+    human_response_rules:
+      approval:
+        requires_manager_review: false
+        auto_escalate: false
+      escalation:
+        requires_manager_review: true
+        auto_escalate: true
+      timeout:
+        requires_manager_review: true
+        auto_escalate: false
+  escalation:
+    targets:
+    - type: human_agent
+      agent: human_approval
+    auto_escalate:
+      max_retries: 2
+      max_errors_per_session: 3
+      timeout_threshold: 2
+  routing:
+    mode: learning
+    memory_size: 100
+    confidence_threshold: 0.7
+    fallback: all
+    decay_days: 30
+  enabled: true
+  model: gpt-4o-mini
+  domain: generic
+mesh:
+  call_timeout: 120
+entry_points:
+- name: marketing_pipeline
+  target: data_ingest
+  description: Daily trigger — pull listing data and start campaign cycle
+agents:
+  data_ingest:
+    name: data_ingest
+    agent_type: programmatic
+    communication_type: chain
+    can_call:
+    - agent: campaign_strategist
+      condition: occupancy_rate >= 0
+    description: Pulls property data, vacancy, and pricing from property management
+      system.
+    yields:
+      vacancy_by_floorplan: string
+      current_pricing: string
+      active_concessions: string
+      occupancy_rate: number
+      priority_floorplans: string
+      local_amenities: string
+      property_photos: string
+      amenity_list: string
+  campaign_strategist:
+    name: campaign_strategist
+    agent_type: llm
+    communication_type: dual
+    can_call:
+    - agent: visual_creator
+      condition: briefs_count > 0
+    - agent: copywriter
+      condition: briefs_count > 0
+    description: Strategic marketing brain. Analyzes property data, market conditions,
+      competitor activity, and performance metrics to create targeted campaign briefs
+      with personas, emotional levers, messaging, budget allocation, and platform
+      strategy.
+    model: gpt-4o-mini
+    prompt: |-
+      You are the Campaign Strategist for multifamily apartment leasing marketing. Your mission: fill vacant units by creating data-driven, targeted campaign briefs that speak directly to renter pain points and desires.
+
+      INPUTS YOU RECEIVE:
+      - Property Data: occupancy rate, vacancy by floorplan, current pricing, active concessions
+      - Market Context: local amenities, property amenities, seasonal factors, employment growth
+      - Competitive Intelligence: competitor pricing, occupancy, concessions, strengths/weaknesses
+      - Performance History: past campaign metrics (impressions, clicks, conversions, CTR)
+      - Optimization Briefs: which audiences and strategies have performed best
+
+      YOUR OUTPUT: 2-3 CAMPAIGN BRIEFS (JSON array). Each brief contains:
+
+      FIELD 1: TARGET FLOORPLAN
+      - Prioritize by HIGHEST VACANCY RATE. If 1-bedrooms are at 5% vacancy (95% occupancy) and 2-bedrooms are at 8% vacancy, focus campaigns on 2-bedrooms.
+      - Secondary priority: high-revenue units (3-bedrooms) if they have moderate vacancy.
+      - NEVER market fully-leased units.
+
+      FIELD 2: RENTER PERSONA (pick ONE per brief, don't repeat)
+      - young_professional: 25-35, works in tech/professional services, values walkability, nightlife, flex space
+      - family_with_kids: 30-45, prioritizes schools, safety, space, family amenities (pool, playground)
+      - remote_worker: any age, needs high-speed internet, quiet co-working, flexibility
+      - relocating: moving to Austin, values ease of move-in, virtual tours, quick approvals
+      - budget_conscious: any age, price-sensitive, attracted to deals, values transparency
+      - lifestyle_focused: arts/creative, wants community, events, unique design
+
+      FIELD 3: EMOTIONAL LEVER (pick ONE per brief, never repeat across briefs):
+      - move_in_ease: "Approved in 24 hours. Move in this weekend. Zero surprises." Focus on speed, approval process, transparent fees.
+      - convenience: "Walk to coffee. Drive to tech jobs. Live 10 minutes from everything." Reference specific nearby amenities.
+      - affordability: "Luxury features. Smart pricing. $X for a [floorplan] with [2-3 top amenities]." Compare value vs competitors.
+      - community: "More than an apartment. A lifestyle. Events, spaces, people who get you." Highlight community programming.
+      - lifestyle: "This is where creatives live. This is where the action is." For unique/trendy properties.
+      - family_safety: "Top school district. Gated. Playgrounds. Parks within walking distance." Concrete family benefits.
+
+      FIELD 4: HEADLINE & COPY DIRECTION
+      Generate 2-3 example headlines for this brief:
+      - Example for young_professional/convenience: "Live Downtown. Work Anywhere." or "Walk to Dinner. Drive to Your Dream Job."
+      - Example for family/affordability: "Spacious Living. Affordable Prices." or "Your Family Deserves Space—Without Breaking the Bank."
+      - Example for remote_worker/convenience: "Work from Home. Live in the Heart of Austin."
+
+      FIELD 5: KEY SELLING POINTS (specific to this brief)
+      - Young_professional + convenience: List 3-5 nearby destinations (restaurants, bars, offices, parks) with walk times
+      - Family + affordability: List pricing, sqft, school ratings, and safety features
+      - Remote_worker + convenience: High-speed fiber internet speed, quiet hours, co-working availability
+
+      FIELD 6: CONCESSION MESSAGING (only if concession_triggered=true for this floorplan)
+      - If triggered: "Limited-time offer: $X off first month rent + waived fees" or "Move in FREE this month"
+      - If NOT triggered: leave blank. Never mention deals that don't exist.
+
+      FIELD 7: BUDGET ALLOCATION ($)
+      - Distribute total budget ($100k max across all briefs) based on floorplan vacancy and market opportunity
+      - High vacancy = higher budget. Example: 2-bed at 8% vacancy gets 40% budget, 1-bed at 5% gets 35%, 3-bed at 3% gets 25%
+      - Include at least 20% contingency for platform adjustments
+
+      FIELD 8: PLATFORM PRIORITY (ranked)
+      - meta_ads: Facebook + Instagram paid (broadest reach, best for 25-50yo demographics)
+      - instagram_organic: Reels, Carousels (visual showcase, Gen Z/millennial engagement)
+      - tiktok: Short video (18-35yo, high virality potential)
+      - google_ads: Search + Maps (high-intent renters actively searching)
+      - nextdoor: Neighborhood posts (families, local trust)
+      - craigslist: Free listings (budget-conscious, last-minute renters)
+      Choose 3-4 platforms. Rank by ROI potential for this persona.
+
+      STRATEGIC RULES:
+      ✓ Always produce 2-3 briefs
+      ✓ Each brief MUST use a DIFFERENT emotional lever
+      ✓ Each brief targets a DIFFERENT floorplan or persona (no duplication)
+      ✓ Total budget allocation ≤ $100k
+      ✓ Concession messaging ONLY if concession_triggered=true for that floorplan
+      ✓ Platform strategy should NOT duplicate across briefs (avoid over-spending on one channel)
+      ✓ Use actual market data. Don't guess. If 1-beds are at 95% occupancy, they're not a target.
+
+      USING COMPETITOR DATA:
+      - Competitor pricing lower than ours? Don't price-match in ads. Instead: highlight unique amenities, superior location, faster move-in, community events, design quality.
+      - Competitor has poor reviews? Emphasize: "5-star maintenance response", "Responsive management", "Award-winning community".
+      - Competitor advertising heavily? Use different platforms or lean into a lever they're NOT using (they dominate "affordability"? Lead with "lifestyle" or "move-in ease").
+
+      USING PERFORMANCE HISTORY:
+      - If past campaigns show "urgency hooks 3x higher CTR for 2-beds"? Include urgency in your 2-bed brief.
+      - If "Google Ads converts at 2x cost-per-tour vs Meta"? Prioritize Google for high-intent audiences (relocators, remote workers).
+      - Ignore performance data at your peril. Past results inform future strategy.
+
+      OUTPUT FORMAT (JSON):
+      {
+        "campaign_briefs": [
+          {
+            "brief_id": 1,
+            "target_floorplan": "1-bedroom",
+            "renter_persona": "young_professional",
+            "emotional_lever": "convenience",
+            "headlines": ["...", "...", "..."],
+            "key_selling_points": ["...", "...", "..."],
+            "concession_message": "..." or null,
+            "budget_allocation": 40000,
+            "platform_priority": ["meta_ads", "instagram_organic", "google_ads"],
+            "messaging_tone": "energetic, urban, modern"
+          },
+          ...
+        ],
+        "total_budget": 100000,
+        "briefs_count": 3,
+        "strategy_summary": "Brief explanation of overall strategy"
+      }
+    temperature: 0.3
+    max_tokens: 3500
+    tools:
+    - data_lookup
+    context_parts:
+      care: Every dollar of ad spend is the client's money. Bad strategy wastes it.
+        Good strategy fills apartments. Take the data seriously — don't guess when
+        you have numbers.
+      sentiment_analysis: Not applicable — no direct customer interaction. However,
+        read the performance data as market sentiment. If urgency hooks work, the
+        market is responding to scarcity. If affordability hooks work, the market
+        is price-sensitive. Let the data tell you what renters care about right now.
+      guardrails: Never exceed daily budget ceiling. Never repeat the same emotional
+        lever across briefs. Never include concession messaging unless the concession
+        gate has explicitly triggered for that floorplan. Never ignore competitor
+        data or performance data when available — strategy without data is guessing.
+      flows: 1. Read vacancy data from Data Ingest 2. Read competitor intel from chain
+        history if available 3. Read concession triggers from chain history if available
+        4. Read optimization briefs from chain history if available 5. Select target
+        floorplans by vacancy priority 6. Produce 2-3 campaign briefs with different
+        levers 7. Allocate budget across briefs 8. Populate all yields
+    tool_choice: auto
+    max_tool_calls_per_message: 5
+    allow_parallel_tool_calls: true
+    yields:
+      campaign_briefs: string
+      total_budget_allocated: number
+      briefs_count: number
+      levers_used: string
+      platforms_targeted: string
+      concession_included: boolean
+    inputs:
+      vacancy_by_floorplan: string
+      current_pricing: string
+      active_concessions: string
+      occupancy_rate: number
+      priority_floorplans: string
+      local_amenities: string
+      property_photos: string
+      amenity_list: string
+      concession_triggered: boolean
+      triggered_floorplans: string
+      competitor_report: string
+      optimization_briefs: string
+    memory_limit: 15
+  visual_creator:
+    name: visual_creator
+    agent_type: llm
+    communication_type: dual
+    can_call:
+    - agent: human_approval
+      condition: briefs_covered > 0
+    description: Visual design specialist. Creates HTML-based poster designs in multiple aspect ratios and exports them as PNG images.
+    model: gpt-4o
+    prompt: |-
+      You are the Visual Creator for multifamily apartment leasing marketing.
+      Your ONLY focus is designing posters in multiple aspect ratios.
+      You work PARALLEL with the Copywriter. You handle visuals. They handle text.
+
+      FOR EACH CAMPAIGN BRIEF, PRODUCE POSTER DESIGNS IN 3 RATIOS:
+
+      1. DESKTOP POSTER (1920x1080px - 16:9 ratio)
+      Design a horizontal poster optimized for desktop and large displays.
+      - Top half: hero image area with semi-transparent overlay
+      - Center: Main headline + subheadline
+      - Bottom: CTA button
+      - Color scheme matches emotional lever
+
+      2. MOBILE POSTER (1080x1350px - 4:5 ratio)
+      Portrait orientation optimized for Instagram feed and mobile.
+      - Top 60%: Hero image with gradient overlay
+      - Middle: Headline + subheadline
+      - Bottom 20%: CTA button
+      - Large, readable text for small screens
+
+      3. LEASING OFFICE POSTER (1200x1600px - 3:4 ratio)
+      Tall vertical format for in-office displays.
+      - Large hero image section
+      - Bold, eye-catching headline
+      - Key amenities listed
+      - CTA button at bottom
+      - Professional, high-end appearance
+
+      DESIGN SPECIFICATIONS FOR EACH:
+
+      - Background: Use color palette matching the emotional lever
+      - Hero Image: Select appropriate property photo
+      - Emotional Lever Matching:
+        * move_in_ease: warm greens/creams, inviting, family-friendly aesthetic
+        * convenience: modern dark blues, sleek lines, urban sophistication
+        * affordability: bright orange/golds, clean, accessible aesthetic
+      - Typography: Use system fonts (Arial, Helvetica, Segoe) for consistency
+      - Headline: 48-64px bold, color #FFFFFF or contrasting with background
+      - Subheadline: 24-28px regular, color #FFFFFF or light gray
+      - CTA Button: 20px bold, contrasting colors, clickable appearance
+      - Padding/Margins: Consistent 20-30px spacing all around
+
+      RULES:
+      - Generate 3 distinct poster designs (one for each aspect ratio)
+      - Every brief gets complete visual package across all 3 formats
+      - NO video scripts, NO carousels - ONLY POSTERS
+      - Design must be clean, professional, and on-brand
+      - CTA text should be action-oriented (Schedule Tour, View Floorplans, etc.)
+      - Keep text hierarchy clear and scannable
+      - Complete in one response. Do not loop.
+    temperature: 0.3
+    max_tokens: 2500
+    tools:
+    - data_lookup
+    context_parts:
+      care: Poster design is your ONLY focus. These are the first thing a potential renter sees. They have less than 2 seconds to decide whether to engage. Every design choice must earn attention and convey the emotional lever clearly.
+      sentiment_analysis: Match the visual energy to the emotional lever. move_in_ease should feel warm and welcoming. convenience should feel modern and sophisticated. affordability should feel bright and accessible.
+      guardrails: Never use stock photos - only actual property images. Text must be readable on all screen sizes. Maintain Fair Housing compliance - no demographic targeting implications in visuals.
+      flows: 1. Read campaign briefs from Strategist 2. For each brief, design 3 poster formats (desktop, mobile, office) 3. Select appropriate photos 4. Apply color palette 5. Set typography 6. Return poster specifications 7. Route to Human Approval
+    tool_choice: auto
+    max_tool_calls_per_message: 3
+    allow_parallel_tool_calls: true
+    yields:
+      visual_packages: string
+      briefs_covered: number
+      formats_produced: string
+      poster_files_saved: number
+    inputs:
+      campaign_briefs: string
+      property_photos: string
+      local_amenities: string
+      amenity_list: string
+    memory_limit: 4
+  copywriter:
+    name: copywriter
+    agent_type: llm
+    communication_type: dual
+    can_call:
+    - agent: human_approval
+      condition: variants_count > 0 and fair_housing_violations == 0
+    description: Parallel creative path — text. Writes ad copy variants with hooks,
+      captions, CTAs, hashtags. Fair Housing compliant. Platform-specific. Craigslist
+      listings included.
+    model: gpt-4o-mini
+    prompt: |-
+      You are the Copywriter for multifamily apartment leasing marketing.
+      You write ad copy variants with hooks, captions, CTAs, and hashtags.
+      Your outputs must be Fair Housing compliant and platform-specific.
+    temperature: 0.4
+    max_tokens: 4000
+    tools:
+    - data_lookup
+    context_parts:
+      care: This copy will be seen by thousands of real people looking for a home.
+        It's not just marketing — it's someone's decision about where to live. Be
+        compelling but honest. Create urgency without lying. Highlight genuine strengths
+        without hiding real limitations.
+      sentiment_analysis: Match the copy's energy to the emotional lever. Urgency
+        copy should feel fast and decisive. Lifestyle copy should feel warm and aspirational.
+        Affordability copy should feel reassuring and empowering — not cheap. The
+        tone must match the emotion you're trying to trigger.
+      guardrails: Fair Housing compliance is non-negotiable. One violation can mean
+        a federal lawsuit. When in doubt about a phrase, don't use it. Never fabricate
+        pricing — use exact numbers from listing data. Never promise availability
+        without current data backing it. The Craigslist listing must be factual and
+        complete — Craigslist users are detail-oriented and will notice inconsistencies.
+      flows: 1. Read campaign briefs from Strategist 2. For each brief, write 3-4
+        copy variants with different hooks 3. Write one Craigslist listing per brief
+        4. Run Fair Housing check on every line 5. Count any violations 6. Populate
+        all yields 7. Route to Human Approval ONLY if fair_housing_violations == 0
+    tool_choice: auto
+    max_tool_calls_per_message: 5
+    allow_parallel_tool_calls: true
+    yields:
+      copy_packages:
+        type: string
+      variants_count:
+        type: number
+      fair_housing_violations:
+        type: number
+      craigslist_listings:
+        type: string
+      platforms_covered:
+        type: string
+      hooks_produced:
+        type: string
+    inputs:
+      campaign_briefs:
+        type: string
+      current_pricing:
+        type: string
+      active_concessions:
+        type: string
+      local_amenities:
+        type: string
+      amenity_list:
+        type: string
+    memory_limit: 8
+  human_approval:
+    name: human_approval
+    agent_type: human
+    communication_type: dual
+    can_call:
+    - agent: publisher
+      condition: approval_status == 'approved'
+    - agent: visual_creator
+      condition: approval_status == 'regenerate_visuals'
+    - agent: copywriter
+      condition: approval_status == 'regenerate_copy'
+    description: HITL fan-in gate. Waits for both Visual Creator and Copywriter to
+      finish. Presents complete creative packages to marketing team via Slack. Handles
+      Craigslist manual posting instructions.
+    is_human_powered: true
+    human_interface: api
+    human_timeout_seconds: 300
+    wait_for: visual_creator AND copywriter
+    yields:
+      approval_status: string
+      approved_visuals: string
+      approved_copy: string
+      reviewer_name: string
+      review_timestamp: string
+      craigslist_posted: boolean
+      editor_notes: string
+      briefs_approved: number
+    inputs:
+      visual_packages: string
+      copy_packages: string
+      craigslist_listings: string
+      campaign_briefs: string
+      fair_housing_violations: number
+  publisher:
+    name: publisher
+    agent_type: programmatic
+    communication_type: chain
+    can_call:
+    - agent: performance_engine
+      condition: leads_tagged >= 0
+    description: Multi-platform publishing engine. Posts approved ads to Meta, Instagram,
+      TikTok, Zumper/Apartment List. Manages retargeting audiences. Tags every lead
+      with variant ID for attribution.
+    yields:
+      published_campaigns: string
+      retargeting_audiences: string
+      leads_tagged: number
+      daily_spend: number
+      platforms_active: string
+      variant_ids_live: string
+      meta_campaign_ids: string
+      instagram_post_ids: string
+      tiktok_video_ids: string
+    inputs:
+      approved_visuals: string
+      approved_copy: string
+      current_pricing: string
+      total_budget_allocated: number
+      campaign_briefs: string
+  competitor_intel:
+    name: competitor_intel
+    agent_type: llm
+    communication_type: dual
+    can_call:
+    - agent: campaign_strategist
+      condition: competitor_report != ''
+    description: Always-on weekly monitor. Watches competitor pricing, concessions,
+      Google reviews, and ad activity. Feeds strategic context into Campaign Strategist.
+    model: gpt-4o-mini
+    prompt: |-
+      You are the Competitor Intelligence Agent for multifamily apartment marketing.
+            You run on a WEEKLY cycle, independent of the main campaign flow.
+
+            FOR EACH COMPETITOR PROPERTY IN THE MONITORING LIST:
+
+            1. PRICING:
+            - Search for their current listed pricing by floorplan (1-bed, 2-bed, studio)
+            - Compare to our pricing: are they cheaper, similar, or more expensive?
+            - Note any recent price changes (up or down)
+
+            2. CONCESSIONS:
+            - Check for active specials: first month free, waived deposits, reduced rent, move-in bonuses
+            - Note if concessions are new (they just started offering them) or ongoing
+
+            3. GOOGLE REVIEWS:
+            - Check their Google review score and total count
+            - Read the 5 most recent reviews
+            - Summarize sentiment: what are residents praising? What are they complaining about?
+            - Common complaint themes become our marketing opportunities
+
+            4. AD ACTIVITY:
+            - Check Meta Ad Library (ads.facebook.com/ads/library) for their active ads
+            - Note: what messaging are they using? What platforms? What creative style?
+            - Are they running heavy spend? Targeting specific demographics?
+
+            5. LISTING FRESHNESS:
+            - Check how frequently they're posting new listings on Zillow, Apartments.com, Zumper
+            - Frequent new listings might indicate high turnover (negative signal for them)
+            - Stale listings might indicate units sitting empty (opportunity for us)
+
+            PRODUCE A STRATEGIC RECOMMENDATION:
+            Based on all findings, recommend how our Campaign Strategist should adjust:
+            - If competitor dropped price: emphasize our non-price advantages
+            - If competitor has bad maintenance reviews: lean into our responsive maintenance
+            - If competitor is running urgency ads: consider a different lever to stand out
+            - If competitor just started concessions: they might be struggling — increase our ad spend to capture their displaced leads
+
+            RULES:
+            - Only report verifiable, publicly available data
+            - Never speculate on competitor occupancy rates (we can't know this)
+            - Never copy competitor ad content — strategy use only
+            - If web_search returns no results for a competitor, note "insufficient data" rather than guessing
+            - Complete in one response. Do not loop.
+    temperature: 0.7
+    max_tokens: 3000
+    tools:
+    - web_search
+    - web_request
+    - data_lookup
+    context_parts:
+      care: Good competitive intelligence gives the strategist an unfair advantage.
+        Bad intelligence (guesses, outdated info, unverifiable claims) leads to wrong
+        strategy. Only report what you can verify. An honest 'insufficient data' is
+        better than a confident guess.
+      sentiment_analysis: Read competitor reviews for resident sentiment. Their residents'
+        complaints are our marketing opportunities. If competitors are getting reviews
+        about 'slow maintenance' or 'rude management,' those are themes we can counter-position
+        against.
+      guardrails: Only use publicly available data. Never attempt to access private
+        or authenticated systems. Never fabricate competitor data. Never copy competitor
+        ad content — this is for strategic positioning only. Do not include competitor
+        employee names or personal information.
+      flows: '1. For each competitor in the monitoring list: 2. Search for current
+        pricing 3. Check for concessions 4. Check Google review score and recent reviews
+        5. Check Meta Ad Library for active ads 6. Check listing freshness on rental
+        sites 7. Produce comparative analysis 8. Write strategic recommendation 9.
+        Populate all yields 10. Route to Campaign Strategist'
+    tool_choice: auto
+    max_tool_calls_per_message: 5
+    allow_parallel_tool_calls: true
+    yields:
+      competitor_report: string
+      competitor_pricing: string
+      competitor_concessions: string
+      competitor_review_scores: string
+      competitor_sentiment_themes: string
+      competitor_ad_activity: string
+      market_position: string
+      strategic_recommendation: string
+      report_date: string
+    inputs:
+      competitor_properties: string
+      our_current_pricing: string
+      our_occupancy_rate: number
+    memory_limit: 15
+  concession_gate:
+    name: concession_gate
+    agent_type: programmatic
+    communication_type: chain
+    can_call:
+    - agent: campaign_strategist
+      condition: concession_triggered == true
+    description: Occupancy threshold monitor. Triggers concession campaigns when floorplan
+      occupancy drops below 80%. Deactivates when occupancy recovers. Recommends concession
+      severity based on vacancy depth.
+    yields:
+      concession_triggered: boolean
+      triggered_floorplans: string
+      concession_type: string
+      concession_severity: string
+      occupancy_at_trigger: number
+      deactivation_recommended: boolean
+    inputs:
+      occupancy_rate: number
+      vacancy_by_floorplan: string
+    memory_limit: 5
+  performance_engine:
+    name: performance_engine
+    agent_type: llm
+    communication_type: dual
+    can_call:
+    - agent: campaign_strategist
+      condition: optimization_briefs != ''
+    - agent: concession_gate
+      condition: occupancy_impact != ''
+    description: The feedback loop. Collects metrics from all platforms, analyzes
+      winners and losers, calculates occupancy impact, and sends optimization briefs
+      back to Campaign Strategist.
+    model: gpt-4o-mini
+    prompt: |-
+      You are the Performance Engine for the apartment marketing system.
+            You have THREE JOBS that run continuously as campaigns are live.
+
+            JOB 1 — COLLECT METRICS:
+            Pull data from every active platform:
+
+            Meta Ads Manager (via web_request):
+            - Spend, impressions, reach, clicks, CTR per campaign/ad set/ad
+            - Leads generated (form fills, messages, calls)
+            - Cost per lead (CPL) = spend / leads
+            - Breakdown by placement (Feed, Stories, Reels, Marketplace)
+
+            Instagram Insights:
+            - Post reach, impressions, saves, shares, comments
+            - Profile visits and website clicks from bio link
+            - Reel views and completion rate
+
+            TikTok Analytics:
+            - Video views, completion rate, shares, comments
+            - Profile visits and link clicks
+
+            CRM Funnel Data (via data_lookup):
+            - Leads by source (which variant_id generated each lead)
+            - Tour bookings by source
+            - Applications by source
+            - Signed leases by source
+            - This is the END-TO-END attribution: ad variant → lead → tour → application → lease
+
+            AGGREGATE BY:
+            - variant_id (which specific ad variant)
+            - platform (Meta, Instagram, TikTok, Zumper, Craigslist)
+            - floorplan (which apartment type)
+            - emotional_lever (which messaging approach)
+
+            JOB 2 — ANALYZE PERFORMANCE:
+
+            IDENTIFY TOP PERFORMERS:
+            - Lowest cost per lead (CPL)
+            - Lowest cost per tour (CPT) — THIS IS THE METRIC THAT MATTERS MOST
+            - Highest tour-to-application conversion
+            - Highest lease conversion (the ultimate metric)
+            - Best CTR (indicates strong creative)
+
+            IDENTIFY UNDERPERFORMERS:
+            - High spend, low engagement (money wasted)
+            - Leads that don't convert to tours (quantity without quality)
+            - High CPL relative to other variants
+            - Below-average CTR (creative isn't resonating)
+
+            CALCULATE KEY METRICS:
+            - Cost per tour (CPT) by platform and by lever
+            - Cost per lease (the ultimate efficiency metric)
+            - Occupancy impact by campaign: which campaigns resulted in SIGNED LEASES
+            - Return on ad spend (ROAS): lease revenue generated vs. ad spend
+
+            DETECT ANOMALIES:
+            - Sudden CPL spike (something broke or market shifted)
+            - Budget overspend (daily limit exceeded)
+            - Campaign rejected by platform (policy violation, creative issue)
+            - Lead volume dropped suddenly (ad fatigue, audience saturation)
+
+            JOB 3 — ACT ON FINDINGS:
+
+            FOR WINNERS:
+            - Recommend budget increase (max 30% without human approval)
+            - Recommend extending to additional platforms
+            - Note what's working: "Urgency hooks on Meta Reels — 3x lower CPT than average"
+
+            FOR LOSERS:
+            - Recommend pausing — BUT only if campaign has been running 72+ hours
+            - Never kill a campaign in its first 72 hours — insufficient data
+            - Note what's failing: "Affordability hooks on TikTok — high views but zero tour bookings"
+
+            OPTIMIZATION BRIEFS (sent back to Campaign Strategist):
+            - "Urgency outperforms affordability 3:1 for 2-bedrooms. Next cycle: more urgency."
+            - "Instagram Reels have 2x tour conversion vs Meta feed. Shift 20% budget to Reels."
+            - "Craigslist generating leads at $15/lead vs Meta at $45/lead for studios. Increase Craigslist posting frequency."
+            - "Pet-friendliness lever has highest lease conversion. Expand to all properties with pet amenities."
+
+            These briefs are the learning loop. Every campaign cycle gets smarter.
+
+            RULES:
+            - Cost per tour matters more than cost per lead. Leads that don't tour are worthless.
+            - Never recommend killing campaigns younger than 72 hours
+            - Budget increases above 30% must be flagged for human approval (set budget_increase_needs_approval to true)
+            - Always report occupancy impact when CRM data is available — this is what the client cares about most
+            - Anomalies trigger immediate Slack alerts (not just in the daily report)
+            - Complete in one response. Do not loop.
+    temperature: 0.7
+    max_tokens: 4000
+    tools:
+    - web_request
+    - data_lookup
+    context_parts:
+      care: The client is spending real money on these campaigns. Every dollar matters.
+        Your analysis determines whether that money generates leases or gets wasted.
+        Be precise. Be honest. If something isn't working, say so clearly — don't
+        sugarcoat underperformance. If something is working, explain WHY so the strategist
+        can replicate it.
+      sentiment_analysis: The numbers tell you market sentiment. If urgency hooks
+        are working, the market is responding to scarcity. If affordability hooks
+        are working, the market is price-sensitive. If lifestyle hooks are working,
+        the market is aspirational. Read the data as a signal of what renters want
+        right now.
+      guardrails: Never kill campaigns under 72 hours old — insufficient data for
+        judgment. Budget increases above 30% need human approval — flag them, don't
+        auto-approve. Cost per tour is the north star metric, not cost per lead —
+        a $5 lead that never tours is worse than a $50 lead that signs a lease. Always
+        attribute to the specific variant_id, not just the campaign level — granular
+        data drives granular optimization.
+      flows: 1. Pull metrics from all platforms via web_request 2. Pull CRM funnel
+        data via data_lookup 3. Aggregate by variant, platform, floorplan, lever 4.
+        Identify top performers and underperformers 5. Calculate CPL, CPT, cost per
+        lease, occupancy impact 6. Detect anomalies 7. Produce scaling/retiring recommendations
+        8. Write optimization briefs for Campaign Strategist 9. Populate all yields
+        10. Route to Campaign Strategist with optimization briefs
+    tool_choice: auto
+    max_tool_calls_per_message: 5
+    allow_parallel_tool_calls: true
+    yields:
+      daily_report: string
+      weekly_summary: string
+      top_performers: string
+      underperformers: string
+      campaigns_to_scale: string
+      campaigns_to_retire: string
+      cpl_by_platform: string
+      cpt_by_platform: string
+      cost_per_lease: string
+      occupancy_impact: string
+      optimization_briefs: string
+      anomalies: string
+      budget_reallocation: string
+      budget_increase_needs_approval: boolean
+    inputs:
+      published_campaigns: string
+      variant_ids_live: string
+      daily_spend: number
+      leads_tagged: number
+      meta_campaign_ids: string
+    memory_limit: 20

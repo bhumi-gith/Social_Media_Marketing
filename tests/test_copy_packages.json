@@ -1,0 +1,150 @@
+{
+  "copy_packages": [
+    {
+      "brief_id": "brief_001",
+      "floorplan": "2-Bedroom",
+      "emotional_lever": "move_in_ease",
+      "variants": [
+        {
+          "variant_id": "copy_var_001",
+          "hook": "Approved in 24 hours",
+          "headline": "Move In This Weekend.",
+          "body_copy": "Your 2-bed family home is waiting. Fast approval. Move-in ready. Available now.",
+          "cta": "Start Your Application →",
+          "hashtags": ["#MovingDay", "#FamilyHomes", "#ApartmentLife", "#RiversideLiving"],
+          "platform": "instagram"
+        },
+        {
+          "variant_id": "copy_var_002",
+          "hook": "Zero deposit this month",
+          "headline": "Your New Family Home — No Deposit.",
+          "body_copy": "Beautiful 2-bedroom. Modern finishes. Dog park. Schools nearby. Waived deposit + $100 credit on move-in.",
+          "cta": "Claim Your Move-In Credit",
+          "hashtags": ["#ZeroDeposit", "#FamilyLiving", "#DenverApts"],
+          "platform": "meta"
+        },
+        {
+          "variant_id": "copy_var_003",
+          "hook": "Perfect for families",
+          "headline": "5 Min to Lincoln Elementary. 2 Min to the Park.",
+          "body_copy": "Location + space + value. Your family deserves this. Modern 2-bed with all the lifestyle hooks you need.",
+          "cta": "Tour Now",
+          "platform": "facebook"
+        },
+        {
+          "variant_id": "copy_var_004",
+          "hook": "This weekend.",
+          "headline": "2-Bed Available. Move This Weekend.",
+          "body_copy": "Not next month. Not next week. This weekend. Approved in 24 hours. Modern finishes. Family-ready.",
+          "cta": "Schedule Your Tour",
+          "platform": "tiktok_text",
+          "tone": "urgent"
+        }
+      ]
+    },
+    {
+      "brief_id": "brief_002",
+      "floorplan": "1-Bedroom",
+      "emotional_lever": "convenience",
+      "variants": [
+        {
+          "variant_id": "copy_var_005",
+          "hook": "10 minutes to everything",
+          "headline": "10 Min to Work. 2 Min to Coffee.",
+          "body_copy": "Your 1-bed is steps from Blue Bottle, walk to downtown, near the best nightlife in Denver. Modern living in the heart of it all.",
+          "cta": "Check Availability",
+          "hashtags": ["#CityLiving", "#Walkable", "#DenverLife", "#LocationLocation"],
+          "platform": "instagram"
+        },
+        {
+          "variant_id": "copy_var_006",
+          "hook": "Walk to work",
+          "headline": "Your Office is 10 Min Away (Walking).",
+          "body_copy": "Modern 1-bed with city views. Steps from transit, restaurants, nightlife. The commute you've been dreaming about.",
+          "cta": "Tour My Apartment →",
+          "platform": "tiktok_text"
+        },
+        {
+          "variant_id": "copy_var_007",
+          "hook": "The commute that doesn't suck",
+          "headline": "10-Min Commute to Downtown. Zero Traffic.",
+          "body_copy": "Walk to work. Walk to dinner. Walk to your life. Modern 1-bed in the most connected neighborhood in Denver.",
+          "cta": "See Available Units",
+          "hashtags": ["#WorkFromWhere", "#ConvenientLiving", "#DenverTech"],
+          "platform": "meta"
+        }
+      ]
+    },
+    {
+      "brief_id": "brief_003",
+      "floorplan": "Studio",
+      "emotional_lever": "affordability",
+      "variants": [
+        {
+          "variant_id": "copy_var_008",
+          "hook": "$1,150 for luxury",
+          "headline": "$1,150 Studio. Luxury Finishes. Real Value.",
+          "body_copy": "Premium apartment. Smart price. Waived deposit. Modern finishes, pool, dog park, all included. This is what smart living looks like.",
+          "cta": "Claim Your Unit Today",
+          "hashtags": ["#SmartRent", "#ValueLiving", "#LuxuryStudio"],
+          "platform": "craigslist"
+        },
+        {
+          "variant_id": "copy_var_009",
+          "hook": "Competitors charge $1,300",
+          "headline": "Studio: $1,150. They Ask $1,300. Choose Smart.",
+          "body_copy": "Same finishes. Same location. Better price. Waived deposit. You're not spending less — you're spending smart.",
+          "cta": "Get My Rate Now",
+          "platform": "zumper"
+        },
+        {
+          "variant_id": "copy_var_010",
+          "hook": "No deposit.",
+          "headline": "$1,150 Studio + Zero Deposit = Move Next Week.",
+          "body_copy": "Modern. Affordable. Available. Waived deposit this month means more money in your pocket on move-in day.",
+          "cta": "Apply Now",
+          "hashtags": ["#ZeroDeposit", "#AffordableApts", "#StudioLife"],
+          "platform": "facebook"
+        }
+      ]
+    }
+  ],
+  "craigslist_listings": [
+    {
+      "brief_id": "brief_001",
+      "floorplan": "2-Bedroom",
+      "title": "Modern 2-Bed Family Home - Dog Park, Schools Nearby - MOVE THIS WEEKEND",
+      "price": 2050,
+      "section": "apartments_for_rent",
+      "listing_body": "RIVERSIDE LUXURY APARTMENTS — 2-Bedroom, 2-Bath\n\n✓ MODERN FINISHES:\n— Stainless steel appliances\n— Quartz countertops with island\n— In-unit washer/dryer\n— Walk-in closets\n— Private balcony with views\n\n✓ FAMILY-FRIENDLY LOCATION:\n— 3 min to Riverside Park (dog park + playground)\n— 5 min to Lincoln Elementary (rated 8.5/10)\n— Walk to Blue Bottle Coffee, local shops\n— Direct bus access (Line 7)\n\n✓ COMMUNITY AMENITIES:\n— Resort-style heated pool\n— 24/7 fitness center with yoga\n— Game room & movie theater\n— Rooftop terrace\n— 24/7 concierge\n\n✓ SPECIAL OFFER:\n— APPROVED IN 24 HOURS\n— MOVE THIS WEEKEND\n— $100 move-in credit\n\nAPPLY TODAY: Visit our leasing office or apply online\nNO APPLICATION FEE",
+      "contact_info": "leasing@riversideluxury.com | 303-555-0123"
+    },
+    {
+      "brief_id": "brief_003",
+      "floorplan": "Studio",
+      "title": "$1,150 Studio - Luxury Finishes, Waived Deposit - AVAILABLE NOW",
+      "price": 1150,
+      "section": "apartments_for_rent",
+      "listing_body": "RIVERSIDE LUXURY APARTMENTS — Studio, 1-Bath\n\n✓ WHAT YOU GET FOR $1,150:\n— Luxury finishes (competitors charge $1,300+)\n— Stainless steel appliances\n— Quartz countertops\n— Modern hardwood-look flooring\n— Air conditioning\n\n✓ COMMUNITY ACCESS:\n— Resort pool with cabanas\n— 24/7 fitness center\n— Dog park (2 acres)\n— Rooftop terrace with city views\n— Co-working lounge\n\n✓ THIS MONTH'S SPECIAL:\n— WAIVED DEPOSIT ($0 move-in)\n— Available for immediate move-in\n— Bus pass included\n\nWHY CHOOSE RIVERSIDE?\n— Modern building (2019)\n— South Denver location\n— Responsive maintenance team\n— Pet-friendly\n— Safe, well-maintained\n\nAPPLY TODAY\nEmail: leasing@riversideluxury.com | Phone: 303-555-0123",
+      "contact_info": "leasing@riversideluxury.com | 303-555-0123"
+    }
+  ],
+  "fair_housing_violations": 0,
+  "platforms_covered": [
+    "instagram",
+    "meta",
+    "facebook",
+    "tiktok",
+    "craigslist",
+    "zumper"
+  ],
+  "hooks_produced": 13,
+  "variants_count": 10,
+  "summary": {
+    "total_copy_variants": 10,
+    "craigslist_listings": 2,
+    "fair_housing_check": "PASSED - No violations detected",
+    "platforms": 6,
+    "hooks": 13
+  }
+}
