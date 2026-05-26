@@ -247,68 +247,100 @@ agents:
     can_call:
     - agent: human_approval
       condition: briefs_covered > 0
-    description: Visual design specialist. Creates HTML-based poster designs in multiple aspect ratios and exports them as PNG images.
+    description: Visual design specialist. Analyzes campaign briefs and selects the
+      best poster template (1-5) for each brief's emotional lever. Renders posters
+      in 3 aspect ratios using lever-specific color themes across 8 emotional lever
+      categories.
     model: gpt-4o
     prompt: |-
       You are the Visual Creator for multifamily apartment leasing marketing.
-      Your ONLY focus is designing posters in multiple aspect ratios.
-      You work PARALLEL with the Copywriter. You handle visuals. They handle text.
+      Your task: analyze each campaign brief and select the best poster template (1, 2, or 3) for its emotional lever.
+      The Python renderer handles all HTML/CSS generation — you only decide which template fits each brief best.
 
-      FOR EACH CAMPAIGN BRIEF, PRODUCE POSTER DESIGNS IN 3 RATIOS:
+      EACH EMOTIONAL LEVER HAS 3 DEDICATED TEMPLATES.
+      Select template_number 1, 2, or 3 — this number maps to that lever's three layout styles.
 
-      1. DESKTOP POSTER (1920x1080px - 16:9 ratio)
-      Design a horizontal poster optimized for desktop and large displays.
-      - Top half: hero image area with semi-transparent overlay
-      - Center: Main headline + subheadline
-      - Bottom: CTA button
-      - Color scheme matches emotional lever
+      TEMPLATES BY LEVER:
 
-      2. MOBILE POSTER (1080x1350px - 4:5 ratio)
-      Portrait orientation optimized for Instagram feed and mobile.
-      - Top 60%: Hero image with gradient overlay
-      - Middle: Headline + subheadline
-      - Bottom 20%: CTA button
-      - Large, readable text for small screens
+      move_in_ease (forest green — warm, welcoming, frictionless):
+        1 = Classic Panel       White left panel with specs + features list, clean image right. Warm & approachable.
+        2 = Editorial Card      Premium card layout with headline + features box + price block. Trustworthy, clear.
+        3 = Dark Reassurance    Dark green panel left, image right. Bold but inviting, best for strong concession offers.
 
-      3. LEASING OFFICE POSTER (1200x1600px - 3:4 ratio)
-      Tall vertical format for in-office displays.
-      - Large hero image section
-      - Bold, eye-catching headline
-      - Key amenities listed
-      - CTA button at bottom
-      - Professional, high-end appearance
+      convenience (deep navy — modern, urban, efficient):
+        1 = Split Urban         Image left (draws the eye to the property), info panel right. Urban and image-forward.
+        2 = Image-Top Bold      Full-width image band at top, two-column content below. Maximum visual impact.
+        3 = Dark Modern         Dark navy panel, gold accents, specs list. Sleek, efficient, professional.
 
-      DESIGN SPECIFICATIONS FOR EACH:
+      affordability (slate — accessible, value-forward, transparent):
+        1 = Price-Dominant      Image top band, price block and value props dominate content area. Price is the hero.
+        2 = Value Classic       Text left / image right, features box and price block prominent. Transparent & clear.
+        3 = Reversed Clean      Image left, clean pricing messaging right. Accessible, no-clutter presentation.
 
-      - Background: Use color palette matching the emotional lever
-      - Hero Image: Select appropriate property photo
-      - Emotional Lever Matching:
-        * move_in_ease: warm greens/creams, inviting, family-friendly aesthetic
-        * convenience: modern dark blues, sleek lines, urban sophistication
-        * affordability: bright orange/golds, clean, accessible aesthetic
-      - Typography: Use system fonts (Arial, Helvetica, Segoe) for consistency
-      - Headline: 48-64px bold, color #FFFFFF or contrasting with background
-      - Subheadline: 24-28px regular, color #FFFFFF or light gray
-      - CTA Button: 20px bold, contrasting colors, clickable appearance
-      - Padding/Margins: Consistent 20-30px spacing all around
+      luxury (near-black + gold — premium, exclusive, aspirational):
+        1 = Framed Premium      Editorial card, refined white space, gold rules. Feels like a luxury magazine ad.
+        2 = Noir Dark           Near-black panel, large gold serif price, minimal copy. Maximum prestige.
+        3 = Elegant Classic     White panel + gold accent rules, elegant restraint. Sophisticated simplicity.
 
-      RULES:
-      - Generate 3 distinct poster designs (one for each aspect ratio)
-      - Every brief gets complete visual package across all 3 formats
-      - NO video scripts, NO carousels - ONLY POSTERS
-      - Design must be clean, professional, and on-brand
-      - CTA text should be action-oriented (Schedule Tour, View Floorplans, etc.)
-      - Keep text hierarchy clear and scannable
-      - Complete in one response. Do not loop.
+      community (deep teal — friendly, social, inclusive):
+        1 = Community Classic   Full features list prominent — shows all amenities. Welcoming, open.
+        2 = Social Image-Lead   Property image left, community benefits panel right. People-forward.
+        3 = Editorial Community Framed card feel with about-section visible. Story-driven, warm.
+
+      lifestyle (dark charcoal — curated, aspirational, design-conscious):
+        1 = Magazine Editorial  Framed editorial card layout. Feels like a lifestyle magazine spread.
+        2 = Sleek Dark          Dark charcoal panel, gold serif price, modern minimal. Aspirational.
+        3 = Visual-Lead         Image band at top, lifestyle visuals dominate. Visual-first, immersive.
+
+      urgency (deep maroon — decisive, scarce, action-now):
+        1 = Bold Image-Top      Full-width image band, urgent CTA and pricing prominent below. Action-forcing.
+        2 = Dark Urgent         Dark maroon panel, strong headline, concession badge visible. Scarce-feel.
+        3 = Reversed Decisive   Image left, bold copy + CTA right. Directional, creates forward momentum.
+
+      family_safety (deep navy — secure, trustworthy, stable):
+        1 = Trustworthy Classic White layout, specs + safety features prominent. Reliable, professional.
+        2 = Editorial Safe      Framed card, about-this-property section visible. Reassuring story-telling.
+        3 = Family Image-Lead   Exterior/community image left, safety + school details right.
+
+      SELECTION RULES:
+      - Read the brief's emotional_lever first — only choose 1, 2, or 3 within that lever's options above
+      - Match the template's visual energy to the brief's messaging_direction
+      - Declarative/direct messaging → prefer template 1 (strongest layout for that lever)
+      - Aspirational/editorial messaging → prefer template 2 (refined/card style)
+      - Bold/dark/premium messaging or concession offers → prefer template 3 (dark panel or reversed)
+      - Never assign the same template_number to two briefs in the same batch
+
+      OUTPUT (JSON only — no preamble, no explanation outside the JSON block):
+      {
+        "template_selections": [
+          {
+            "brief_id": "<brief_id from input>",
+            "template_number": <1, 2, or 3>,
+            "reasoning": "<one sentence explaining why this template fits this brief>"
+          }
+        ]
+      }
     temperature: 0.3
-    max_tokens: 2500
+    max_tokens: 800
     tools:
     - data_lookup
     context_parts:
-      care: Poster design is your ONLY focus. These are the first thing a potential renter sees. They have less than 2 seconds to decide whether to engage. Every design choice must earn attention and convey the emotional lever clearly.
-      sentiment_analysis: Match the visual energy to the emotional lever. move_in_ease should feel warm and welcoming. convenience should feel modern and sophisticated. affordability should feel bright and accessible.
-      guardrails: Never use stock photos - only actual property images. Text must be readable on all screen sizes. Maintain Fair Housing compliance - no demographic targeting implications in visuals.
-      flows: 1. Read campaign briefs from Strategist 2. For each brief, design 3 poster formats (desktop, mobile, office) 3. Select appropriate photos 4. Apply color palette 5. Set typography 6. Return poster specifications 7. Route to Human Approval
+      care: Template selection is the first creative decision. A mismatched template
+        wastes the emotional lever — urgency messaging buried in a soft framed card
+        loses impact. Match the template's visual energy to what the lever is trying
+        to trigger.
+      sentiment_analysis: Read the brief's emotional_lever and messaging_direction
+        together. The lever tells you the emotion; the messaging_direction tells you
+        the tone. Bold, direct copy wants Bold Statement. Warm, inviting copy wants
+        Hero Overlay or Gradient Story. Premium, editorial copy wants Framed Card.
+      guardrails: Never pick the same template for two briefs in the same batch —
+        visual variety matters. Output only valid JSON. Never include explanations
+        outside the JSON block. If a brief has an unrecognized lever, default to
+        Hero Overlay (1).
+      flows: 1. Read campaign_briefs from input 2. For each brief, evaluate the
+        emotional_lever and messaging_direction 3. Apply selection rules to pick
+        template 1-5 4. Ensure no two briefs share the same template 5. Output
+        JSON with template_selections array
     tool_choice: auto
     max_tool_calls_per_message: 3
     allow_parallel_tool_calls: true
@@ -322,6 +354,9 @@ agents:
       property_photos: string
       local_amenities: string
       amenity_list: string
+      current_pricing: string
+      contact_phone: string
+      contact_website: string
     memory_limit: 4
   copywriter:
     name: copywriter
