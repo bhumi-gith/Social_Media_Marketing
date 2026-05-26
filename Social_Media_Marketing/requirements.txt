@@ -1,0 +1,10 @@
+# SocialMediaMarketing_v2 — Dependencies
+
+# LeafMesh SDK (includes all providers + connectors)
+leafmesh
+
+# Scheduler (enables wake_up cron in YAML)
+apscheduler>=3.10.0
+
+# Project dependencies
+python-dotenv>=1.0.0

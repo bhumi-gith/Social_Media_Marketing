@@ -1,0 +1,719 @@
+name: leasing_marketing_mesh
+version: 3.0.0
+architecture: managed_mesh
+environment: development
+debug: true
+log_level: INFO
+
+redis:
+  password: ''
+  session_ttl: 7200
+  host: localhost
+  port: 6379
+
+auto_discover:
+  directory: agency
+  pattern: '*_agent.py'
+  recursive: false
+
+manager:
+  coordination_rules:
+    human_input_rules:
+      max_concurrent_requests: 5
+      max_agent_requests: 10
+      enable_request_queuing: true
+    timeout_rules:
+      max_timeouts_before_escalation: 2
+      timeout_escalation_enabled: true
+      escalation_notify_managers: true
+    workflow_pause_rules:
+      max_pause_duration_minutes: 1440
+      max_concurrent_paused_workflows: 5
+      pause_monitoring_enabled: true
+    human_response_rules:
+      approval:
+        requires_manager_review: false
+        auto_escalate: false
+      escalation:
+        requires_manager_review: true
+        auto_escalate: true
+      timeout:
+        requires_manager_review: true
+        auto_escalate: false
+  escalation:
+    targets:
+      - type: human_agent
+        agent: campaign_approval
+    auto_escalate:
+      max_retries: 2
+      max_errors_per_session: 3
+      timeout_threshold: 2
+  routing:
+    mode: learning
+    memory_size: 100
+    confidence_threshold: 0.7
+    fallback: all
+    decay_days: 30
+  enabled: true
+  model: gpt-4o-mini
+  domain: generic
+
+mesh:
+  call_timeout: 180
+
+entry_points:
+  - name: start_campaign
+    target: pms_data
+    description: >
+      Trigger a new campaign cycle. Provide campaign_prompt describing what the
+      campaign is about (e.g. "summer pool season promotion targeting young professionals").
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AGENT MESH
+#
+# Flow:
+#   pms_data → campaign_strategist → campaign_approval (HITL #1)
+#            → copywriter → visual_creator (5-7 rounds loop)
+#            → content_approval (HITL #2) → publisher → analysis
+#
+# Background (scheduled):
+#   competitor_monitor (3x/day) → campaign_strategist
+#   analysis           (2x/day) → campaign_strategist
+# ─────────────────────────────────────────────────────────────────────────────
+
+agents:
+
+  # ── 1. PMS DATA ──────────────────────────────────────────────────────────
+  pms_data:
+    name: pms_data
+    agent_type: programmatic
+    communication_type: chain
+    description: >
+      Fetches live property data from the PMS. Identifies which floorplans have
+      vacancy, current pricing, active concessions, amenities, and photos.
+      Filters properties that match the campaign brief and need leasing assistance.
+    can_call:
+      - agent: campaign_strategist
+        condition: occupancy_rate >= 0
+    yields:
+      vacancy_by_floorplan: string
+      current_pricing: string
+      active_concessions: string
+      occupancy_rate: number
+      priority_floorplans: string
+      local_amenities: string
+      property_photos: string
+      amenity_list: string
+      matching_properties: string
+    inputs:
+      campaign_prompt: string
+
+  # ── 2. CAMPAIGN STRATEGIST ────────────────────────────────────────────────
+  campaign_strategist:
+    name: campaign_strategist
+    agent_type: llm
+    communication_type: dual
+    description: >
+      Strategic brain. Takes campaign brief + PMS property data and determines
+      the full creative direction: theme, color palette, visual style, messaging
+      tone, target audience, platform strategy, and campaign briefs per floorplan.
+      Also receives updates from competitor_monitor and analysis for mid-cycle adjustments.
+    model: gpt-4o-mini
+    prompt: |-
+      You are the Campaign Strategist for property leasing marketing.
+      Your job: define the complete CREATIVE DIRECTION for the campaign.
+
+      INPUTS YOU RECEIVE:
+      - campaign_prompt: what this campaign is about (from marketing team)
+      - Property Data: occupancy rate, vacancy by floorplan, pricing, concessions, amenities, photos
+      - competitor_report (if available): competitor pricing, reviews, ad activity, market trends
+      - analysis_recommendations (if available): performance insights from live campaigns
+
+      YOUR OUTPUT — a single JSON object:
+      {
+        "campaign_theme": "e.g. Modern Urban Living / Family-First Community / Summer Vibes",
+        "color_palette": {
+          "primary": "#hexcode",
+          "secondary": "#hexcode",
+          "accent": "#hexcode",
+          "text_light": "#FFFFFF",
+          "text_dark": "#1A1A1A",
+          "background": "#hexcode"
+        },
+        "visual_style": "e.g. clean minimalist / bold energetic / warm inviting / playful vibrant",
+        "messaging_tone": "e.g. aspirational / reassuring / direct / playful / premium",
+        "target_audience": "primary renter profile for this campaign",
+        "platform_strategy": ["instagram_organic", "meta_ads", "tiktok"],
+        "campaign_briefs": [
+          {
+            "brief_id": 1,
+            "target_floorplan": "2-bedroom",
+            "renter_persona": "young_professional",
+            "emotional_lever": "convenience",
+            "key_message": "one sentence core message",
+            "headlines": ["headline 1", "headline 2", "headline 3"],
+            "key_selling_points": ["point 1", "point 2", "point 3"],
+            "concession_message": null,
+            "budget_allocation": 40000,
+            "platform_priority": ["meta_ads", "instagram_organic"]
+          }
+        ],
+        "strategy_summary": "one paragraph overview of the full campaign approach",
+        "strategy_ready": true
+      }
+
+      RULES:
+      - Color palette MUST match the emotional lever and target audience
+      - Never market fully-occupied floorplans (above 97% occupancy)
+      - Prioritise floorplans with highest vacancy rate for budget
+      - Use competitor data to DIFFERENTIATE — never to copy their approach
+      - If analysis_recommendations exist, incorporate them into budget/platform adjustments
+      - strategy_ready MUST be true only when full JSON is populated correctly
+      - Produce 2-3 campaign briefs maximum, each with a different emotional lever
+    temperature: 0.3
+    max_tokens: 3500
+    tools:
+      - db_lookup
+      - data_lookup
+    context_parts:
+      care: >
+        Every creative decision serves one goal — filling vacant units. Good strategy
+        creates emotional resonance. Bad strategy wastes the client's marketing budget.
+      guardrails: >
+        Never exceed budget allocations. Never market fully-occupied units (>97% occupancy).
+        Never fabricate data. strategy_ready must only be true when full JSON output is complete.
+        Never repeat the same emotional lever across briefs.
+      flows: |-
+        When called from pms_data (initial campaign trigger):
+          - Read campaign_prompt from input_data
+          - Read property data from upstream_yields.pms_data
+          - Generate complete campaign strategy: theme, colors, briefs
+          - Populate all fields and set strategy_ready = true
+
+        When called from competitor_monitor (background intel update):
+          - competitor_report is available in upstream_yields
+          - Adjust platform_strategy or messaging_tone based on competitor activity
+          - Update campaign_briefs if competitor is using same emotional levers as us
+
+        When called from analysis (performance feedback):
+          - analysis_recommendations available in upstream_yields
+          - Adjust budget_allocation to favour top-performing floorplans/platforms
+          - Update messaging if certain hooks are underperforming
+    tool_choice: auto
+    max_tool_calls_per_message: 5
+    allow_parallel_tool_calls: true
+    can_call:
+      - agent: campaign_approval
+        condition: strategy_ready == true
+    yields:
+      campaign_theme: string
+      color_palette: string
+      visual_style: string
+      messaging_tone: string
+      target_audience: string
+      platform_strategy: string
+      campaign_briefs: string
+      strategy_summary: string
+      strategy_ready: boolean
+    inputs:
+      campaign_prompt: string
+      vacancy_by_floorplan: string
+      current_pricing: string
+      active_concessions: string
+      occupancy_rate: number
+      priority_floorplans: string
+      local_amenities: string
+      amenity_list: string
+      property_photos: string
+      competitor_report: string
+      analysis_recommendations: string
+    memory_limit: 15
+
+  # ── 3. CAMPAIGN APPROVAL — HITL #1 (before creative work) ───────────────
+  campaign_approval:
+    name: campaign_approval
+    agent_type: human
+    communication_type: dual
+    description: >
+      HITL gate #1. Marketing team reviews the campaign strategy (theme, colors,
+      briefs) BEFORE any creative work begins. Approve to start copywriting,
+      or request revision to send back to the strategist.
+    human_interface: webhook
+    human_timeout_seconds: 86400
+    webhook_config:
+      outbound_url: "http://127.0.0.1:9999/human-notify"
+      outbound_headers:
+        Content-Type: "application/json"
+      outbound_timeout: 30
+      max_retries: 1
+      retry_delay: 2
+    can_call:
+      - agent: copywriter
+        condition: "approval_status == 'approved'"
+      - agent: campaign_strategist
+        condition: "approval_status == 'revision_needed'"
+    yields:
+      approval_status: string
+      approved_strategy: string
+      editor_notes: string
+    inputs:
+      campaign_briefs: string
+      campaign_theme: string
+      color_palette: string
+      visual_style: string
+      messaging_tone: string
+      strategy_summary: string
+      target_audience: string
+
+  # ── 4. COPYWRITER ─────────────────────────────────────────────────────────
+  copywriter:
+    name: copywriter
+    agent_type: llm
+    communication_type: dual
+    description: >
+      Writes platform-specific ad copy: headlines, captions, CTAs, hooks, hashtags.
+      Fair Housing compliant. Iterates with visual_creator up to 7 rounds.
+      Revises copy based on visual alignment feedback each round.
+    model: gpt-4o-mini
+    prompt: |-
+      You are the Copywriter for property leasing marketing. You write compelling,
+      Fair Housing-compliant ad copy for social media and digital ads.
+
+      WHAT TO PRODUCE for each campaign brief:
+      1. Primary headline (max 8 words, punchy)
+      2. Subheadline (max 15 words, expands on headline)
+      3. CTA text (max 5 words, action-oriented)
+      4. Instagram caption (150-200 chars, engaging, with emojis)
+      5. Meta ad body copy (50-80 words, benefit-focused)
+      6. TikTok hook (first 3 seconds, max 10 words — must stop the scroll)
+      7. Hashtag set (8-12 relevant hashtags)
+
+      OUTPUT (JSON):
+      {
+        "copy_packages": [
+          {
+            "brief_id": 1,
+            "headline": "...",
+            "subheadline": "...",
+            "cta": "...",
+            "instagram_caption": "...",
+            "meta_ad_body": "...",
+            "tiktok_hook": "...",
+            "hashtags": ["#tag1", "#tag2"],
+            "revision_notes_applied": "what changed from last round (empty on first pass)"
+          }
+        ],
+        "copy_draft_ready": true,
+        "fair_housing_violations": 0,
+        "copy_finalized": false
+      }
+
+      FAIR HOUSING: Never reference race, religion, national origin, sex, disability,
+      familial status, or age. When in doubt, remove the phrase.
+    temperature: 0.45
+    max_tokens: 4000
+    context_parts:
+      care: >
+        This copy is someone's decision about where to live. Be compelling and honest.
+        Create urgency without lying. Highlight genuine strengths.
+      guardrails: >
+        Fair Housing compliance is non-negotiable. One violation = federal lawsuit risk.
+        Never fabricate pricing. Never promise availability without current data.
+        copy_finalized stays false during iteration — visual_creator sets creative_finalized.
+      flows: |-
+        When called from campaign_approval (first time, revision_round = 0):
+          - This is the initial brief — write fresh copy for ALL campaign briefs
+          - Read campaign_theme, color_palette, messaging_tone from upstream_yields
+          - Set copy_draft_ready = true, copy_finalized = false
+
+        When called from visual_creator (subsequent revision rounds):
+          - visual_feedback is in upstream_yields.visual_creator.visual_feedback
+          - Revise copy to better align with visual direction based on that feedback
+          - Note what changed in revision_notes_applied
+          - Keep fair_housing_violations = 0
+
+        When called from content_approval (post-HITL copy revision):
+          - Marketing team notes are in input_data
+          - Apply their specific feedback
+          - Set copy_draft_ready = true
+    tools:
+      - db_lookup
+      - data_lookup
+    tool_choice: auto
+    allow_parallel_tool_calls: false
+    yields:
+      copy_packages: string
+      current_copy: string
+      copy_draft_ready: boolean
+      copy_finalized: boolean
+      fair_housing_violations: number
+    inputs:
+      campaign_briefs: string
+      campaign_theme: string
+      color_palette: string
+      messaging_tone: string
+      visual_feedback: string
+      current_pricing: string
+      active_concessions: string
+      editor_notes: string
+    memory_limit: 10
+    can_call:
+      - agent: visual_creator
+        condition: copy_draft_ready == true
+
+  # ── 5. VISUAL CREATOR ─────────────────────────────────────────────────────
+  visual_creator:
+    name: visual_creator
+    agent_type: llm
+    communication_type: dual
+    description: >
+      Creates visual design specs and poster layouts. Manages the creative iteration
+      loop with copywriter — reviews copy-visual alignment and provides feedback.
+      Tracks revision_round (max 7). Finalises complete creative package when
+      alignment score >= 8 or max rounds reached. Then routes to content_approval.
+    model: gpt-4o
+    prompt: |-
+      You are the Visual Creator for property leasing marketing. You design the
+      visual identity and create poster specs for each campaign brief.
+
+      POSTER FORMATS (produce specs for all 3 per brief):
+      1. Desktop  — 1920x1080px (16:9)  — hero + headline + CTA
+      2. Mobile   — 1080x1350px (4:5)   — portrait, Instagram-optimised
+      3. Office   — 1200x1600px (3:4)   — tall vertical, in-office display
+
+      FOR EACH FORMAT, SPECIFY:
+      - background_style: gradient / solid / image-overlay (with colors from palette)
+      - layout_description: where elements sit (hero image top, text middle, CTA bottom, etc.)
+      - typography: font family, headline size (px), weight, color
+      - image_placement: how property photo is used
+      - overlay: opacity and color of any overlay on the image
+      - visual_copy_score: 1-10, how well the current copy aligns with this visual
+
+      ITERATION MANAGEMENT:
+      - Track revision_round (read from upstream or start at 0, then increment each call)
+      - If average visual_copy_score < 8 AND revision_round < 7:
+          set creative_finalized = false, provide specific visual_feedback for copywriter
+      - If average score >= 8 OR revision_round >= 7:
+          set creative_finalized = true
+          populate final_copy (copy from copywriter's last output)
+          populate final_visuals (your complete visual_packages JSON string)
+
+      OUTPUT (JSON):
+      {
+        "visual_packages": [
+          {
+            "brief_id": 1,
+            "desktop_spec": {"background_style": "...", "layout_description": "...", "typography": {...}, "image_placement": "..."},
+            "mobile_spec": {"background_style": "...", "layout_description": "...", "typography": {...}, "image_placement": "..."},
+            "office_spec": {"background_style": "...", "layout_description": "...", "typography": {...}, "image_placement": "..."},
+            "color_application": {"primary_usage": "...", "accent_usage": "..."},
+            "visual_copy_score": 8
+          }
+        ],
+        "visual_feedback": "specific feedback to copywriter for next revision (empty if finalized)",
+        "revision_round": <incremented integer>,
+        "creative_finalized": <true or false>,
+        "final_copy": "<full JSON string of copy_packages from copywriter — only when creative_finalized=true>",
+        "final_visuals": "<full JSON string of visual_packages — only when creative_finalized=true>",
+        "briefs_covered": <number of briefs processed>
+      }
+    temperature: 0.3
+    max_tokens: 3500
+    context_parts:
+      care: >
+        Posters are the first impression. Every design choice must earn attention
+        within 2 seconds. Colors must match the emotional lever. Typography must
+        be readable at all sizes.
+      guardrails: >
+        Never imply demographic targeting in visual descriptions. Maintain Fair Housing
+        compliance. Text must be readable on mobile (min 24px for body, 48px for headline).
+        creative_finalized must be true before final_copy and final_visuals are populated.
+      flows: |-
+        When called from copywriter (first time, revision_round starts at 0):
+          - Read campaign_theme, color_palette, visual_style from upstream_yields
+          - Read copy_packages from upstream_yields.copywriter
+          - Create initial visual specs for all 3 formats per brief
+          - Evaluate visual-copy alignment score per brief
+          - If score < 8: set creative_finalized=false, write specific visual_feedback
+          - If score >= 8: set creative_finalized=true, populate final_copy + final_visuals
+          - Increment revision_round
+
+        When called from copywriter (subsequent rounds):
+          - Read updated copy from upstream_yields.copywriter.copy_packages
+          - Check if copy incorporated your previous visual_feedback
+          - Re-evaluate alignment score
+          - revision_round >= 7 → force creative_finalized=true regardless of score
+
+        When called from content_approval (HITL revision):
+          - Marketing team has requested visual changes (editor_notes available)
+          - Apply their feedback to poster specs
+          - Re-evaluate alignment, update creative_finalized accordingly
+    tools:
+      - db_lookup
+    tool_choice: auto
+    allow_parallel_tool_calls: false
+    yields:
+      visual_packages: string
+      visual_feedback: string
+      revision_round: number
+      creative_finalized: boolean
+      final_copy: string
+      final_visuals: string
+      briefs_covered: number
+    inputs:
+      campaign_briefs: string
+      campaign_theme: string
+      color_palette: string
+      visual_style: string
+      copy_packages: string
+      property_photos: string
+      editor_notes: string
+    memory_limit: 10
+    can_call:
+      - agent: copywriter
+        condition: creative_finalized == false and revision_round < 7
+      - agent: content_approval
+        condition: creative_finalized == true or revision_round >= 7
+
+  # ── 6. CONTENT APPROVAL — HITL #2 (marketing team) ──────────────────────
+  content_approval:
+    name: content_approval
+    agent_type: human
+    communication_type: dual
+    description: >
+      HITL gate #2. Marketing team reviews the FINAL copy + visuals created by
+      copywriter and visual_creator. Approve to publish, or request targeted
+      revisions (copy-only or visuals-only) which route back to the relevant agent.
+    human_interface: webhook
+    human_timeout_seconds: 86400
+    webhook_config:
+      outbound_url: "http://127.0.0.1:9999/human-notify"
+      outbound_headers:
+        Content-Type: "application/json"
+      outbound_timeout: 30
+      max_retries: 1
+      retry_delay: 2
+    can_call:
+      - agent: publisher
+        condition: "approval_status == 'approved'"
+      - agent: visual_creator
+        condition: "approval_status == 'revision_visuals'"
+      - agent: copywriter
+        condition: "approval_status == 'revision_copy'"
+    yields:
+      approval_status: string
+      approved_copy: string
+      approved_visuals: string
+      reviewer_name: string
+      review_timestamp: string
+      editor_notes: string
+    inputs:
+      final_copy: string
+      final_visuals: string
+      visual_packages: string
+      campaign_briefs: string
+      briefs_covered: number
+
+  # ── 7. PUBLISHER ──────────────────────────────────────────────────────────
+  publisher:
+    name: publisher
+    agent_type: programmatic
+    communication_type: chain
+    description: >
+      Multi-platform publishing engine. Posts approved copy + visuals to
+      Instagram, Meta Ads, TikTok, and listing platforms. Tags every lead
+      for attribution. Routes back to creative agents on publish errors.
+    can_call:
+      - agent: analysis
+        condition: publish_success == true
+      - agent: visual_creator
+        condition: publish_error == 'visual_issue'
+      - agent: copywriter
+        condition: publish_error == 'copy_issue'
+    yields:
+      published_campaigns: string
+      publish_success: boolean
+      publish_error: string
+      leads_tagged: number
+      daily_spend: number
+      platforms_active: string
+      variant_ids_live: string
+      meta_campaign_ids: string
+    inputs:
+      approved_copy: string
+      approved_visuals: string
+      final_copy: string
+      final_visuals: string
+      campaign_briefs: string
+      color_palette: string
+      editor_notes: string
+
+  # ── 8. ANALYSIS ───────────────────────────────────────────────────────────
+  analysis:
+    name: analysis
+    agent_type: llm
+    communication_type: dual
+    wake_up: "0 9,21 * * *"
+    description: >
+      Analyses published post and campaign performance 2x per day (9 AM and 9 PM).
+      Reviews engagement metrics, ad performance, and conversion data across all platforms.
+      Sends actionable recommendations back to campaign_strategist when changes are needed.
+    model: gpt-4o-mini
+    prompt: |-
+      You are the Analysis Agent for property leasing marketing campaigns.
+      You run twice daily to analyse live campaign performance.
+
+      ANALYSE ACROSS ALL ACTIVE CAMPAIGNS:
+
+      1. POST ENGAGEMENT: likes, comments, shares, saves, reach per post/platform
+      2. AD PERFORMANCE: CTR, CPL (cost per lead), cost per tour booking, conversion rate
+      3. PLATFORM COMPARISON: which platforms generating best qualified leads and tours
+      4. CONTENT PERFORMANCE: which headlines/visuals are driving engagement vs ignored
+      5. AUDIENCE INSIGHTS: who is clicking and converting (infer from behaviour data)
+      6. SPEND EFFICIENCY: daily spend vs leads vs tours — is budget well allocated?
+
+      OUTPUT (JSON):
+      {
+        "analysis_report": "detailed narrative report",
+        "top_performing": ["describe what is working and why"],
+        "underperforming": ["describe what is not working and why"],
+        "platform_insights": {
+          "instagram": "...",
+          "meta_ads": "...",
+          "tiktok": "..."
+        },
+        "spend_efficiency": "summary of budget utilisation",
+        "analysis_recommendations": "specific, actionable recommendations for the campaign_strategist — include which levers to double down on, which to drop, and any budget reallocation suggestions",
+        "action_needed": true
+      }
+
+      RULES:
+      - Only report on verifiable metrics from data_lookup
+      - analysis_recommendations must be concrete enough for campaign_strategist to act immediately
+      - Set action_needed = true only if meaningful strategy changes are warranted
+      - Never recommend killing campaigns under 72 hours old — insufficient data
+    temperature: 0.2
+    max_tokens: 2500
+    tools:
+      - db_lookup
+      - data_lookup
+    context_parts:
+      care: >
+        The client's ad spend depends on your analysis being accurate and actionable.
+        Be direct. If something isn't working, say so clearly.
+      guardrails: >
+        Only report verifiable metrics. Never speculate without data.
+        analysis_recommendations must be specific enough to act on immediately.
+        action_needed = false if there is nothing meaningful to change.
+    allow_parallel_tool_calls: false
+    can_call:
+      - agent: campaign_strategist
+        condition: action_needed == true
+    yields:
+      analysis_report: string
+      top_performing: string
+      underperforming: string
+      platform_insights: string
+      spend_efficiency: string
+      analysis_recommendations: string
+      action_needed: boolean
+    inputs:
+      published_campaigns: string
+      platforms_active: string
+      variant_ids_live: string
+    memory_limit: 20
+
+  # ── 9. COMPETITOR MONITOR ─────────────────────────────────────────────────
+  competitor_monitor:
+    name: competitor_monitor
+    agent_type: llm
+    communication_type: dual
+    wake_up: "0 8,13,19 * * *"
+    description: >
+      Monitors the competitive leasing landscape 3x per day (8 AM, 1 PM, 7 PM).
+      Researches similar properties, active leasings, competitor pricing, concessions,
+      ad activity, and reviews. Feeds strategic intel to campaign_strategist.
+    model: gpt-4o-mini
+    prompt: |-
+      You are the Competitor Monitor for property leasing marketing.
+      You run 3 times per day to give the Campaign Strategist a competitive edge.
+
+      FOR THE LOCAL LEASING MARKET, RESEARCH:
+
+      1. SIMILAR PROPERTIES COMPETING FOR SAME RENTER PROFILES:
+         - Which nearby properties are advertising similar floorplans at similar price points?
+         - What is their current availability and pricing?
+         - What differentiates them (positive and negative)?
+
+      2. ACTIVE LEASING TRENDS:
+         - What concessions are active in the local market? (first month free, waived deposits, etc.)
+         - Any new properties opening or closing?
+         - Seasonal demand signals?
+
+      3. COMPETITOR AD ACTIVITY:
+         - What platforms are competitors using heavily?
+         - What messaging/emotional levers are they using?
+         - Any creative trends worth noting?
+
+      4. REVIEW SENTIMENT:
+         - What are residents praising at competitor properties?
+         - What are the common complaints? (these are our marketing opportunities)
+
+      5. STRATEGIC GAPS:
+         - Where are competitors weak that we can position against?
+         - What emotional levers are they NOT using that we could own?
+
+      OUTPUT (JSON):
+      {
+        "competitor_report": "full narrative competitive analysis",
+        "competitor_pricing": {"property_name": {"studio": "$X", "1br": "$X", "2br": "$X"}},
+        "active_market_concessions": ["list of active deals in the market"],
+        "market_trends": "key trends observed today",
+        "competing_leases": "which properties most directly compete and on what dimensions",
+        "competitor_ad_activity": "what platforms and messages competitors are using",
+        "strategic_gaps": "where we can differentiate and what levers to use",
+        "strategic_recommendation": "specific recommendation for campaign_strategist",
+        "competitor_report_ready": true
+      }
+
+      RULES:
+      - Only report publicly available, verifiable information
+      - Never speculate on competitor occupancy (we cannot know this)
+      - Mark "insufficient data" if search returns nothing — never guess
+      - competitor_report_ready = true only when output is complete
+    temperature: 0.5
+    max_tokens: 3000
+    tools:
+      - web_search
+      - web_request
+      - db_lookup
+      - data_lookup
+    context_parts:
+      care: >
+        Good competitive intelligence gives the strategist an unfair advantage.
+        Bad intelligence (guesses, stale data) leads to wrong strategy.
+        Only report what you can verify.
+      guardrails: >
+        Only use publicly available data. Never attempt to access private systems.
+        Never fabricate competitor data. competitor_report_ready must only be true
+        when the full JSON output is populated.
+    tool_choice: auto
+    max_tool_calls_per_message: 5
+    allow_parallel_tool_calls: true
+    can_call:
+      - agent: campaign_strategist
+        condition: competitor_report_ready == true
+    yields:
+      competitor_report: string
+      competitor_pricing: string
+      active_market_concessions: string
+      market_trends: string
+      competing_leases: string
+      competitor_ad_activity: string
+      strategic_gaps: string
+      strategic_recommendation: string
+      competitor_report_ready: boolean
+    inputs:
+      competitor_properties: string
+      our_current_pricing: string
+    memory_limit: 15
