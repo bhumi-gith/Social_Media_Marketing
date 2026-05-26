@@ -838,6 +838,173 @@ def template_gradient_story(spec: Dict, ratio_type: str, image_url: str, theme: 
     return _build_poster(hero, spec, theme, ratio_type, image_url)
 
 
+# ─── Template 6: Blue Hero Poster ────────────────────────────────────────────
+# Reference-matched layout:
+# TOP (primary-color bg): property name + huge "FOR RENT" headline + dot corner
+#   decorations + 3 white-bordered photos + centered white price card.
+# BOTTOM (white bg): HOME FEATURES pill badge + 3×2 checkmark grid +
+#   description paragraph + rounded pill CTA + two-column circular-icon footer.
+
+def template_blue_hero(spec: Dict, ratio_type: str, image_url: str, theme: Dict) -> str:
+    d             = DIMENSIONS[ratio_type]
+    f             = _fonts(ratio_type)
+    pad           = _PAD[ratio_type]
+    property_name = html_escape(spec.get("property_name", "Property"))
+    availability  = html_escape(spec.get("availability_status", "For Rent"))
+    pricing       = html_escape(spec.get("pricing_info", "Contact for Pricing"))
+    amenities     = spec.get("amenities", [])
+    cta_text      = html_escape(spec.get("call_to_action", "Book Now"))
+    about_text    = html_escape(spec.get("about_text", ""))
+    room_photos   = spec.get("room_photos", [])
+    phone         = html_escape(spec.get("contact_phone", ""))
+    website       = html_escape(spec.get("contact_website", ""))
+    concession    = spec.get("concession_details", "")
+    subheadline   = html_escape(spec.get("subheadline", ""))
+
+    # Per-ratio sizing
+    avail_size  = {"instagram_portrait": 108, "instagram_square": 90, "facebook_post": 58}.get(ratio_type, 90)
+    name_size   = {"instagram_portrait": 38,  "instagram_square": 32, "facebook_post": 22}.get(ratio_type, 32)
+    price_big   = {"instagram_portrait": 54,  "instagram_square": 46, "facebook_post": 34}.get(ratio_type, 46)
+    photo_h     = {"instagram_portrait": 270, "instagram_square": 230, "facebook_post": 130}.get(ratio_type, 230)
+    dot_sz      = {"instagram_portrait": 88,  "instagram_square": 76,  "facebook_post": 52}.get(ratio_type, 76)
+    gap         = {"instagram_portrait": 14,  "instagram_square": 12,  "facebook_post": 8}.get(ratio_type, 12)
+    photo_gap   = {"instagram_portrait": 10,  "instagram_square": 8,   "facebook_post": 5}.get(ratio_type, 8)
+    border_w    = 3 if ratio_type != "facebook_post" else 2
+    feat_px     = f["body"] + 1
+    circ_sz     = f["label"] + 14
+    check_icon  = f["label"] + 1
+
+    # Dot-grid corner decoration
+    def _dots(sz: int) -> str:
+        spacing = sz // 5
+        r       = max(2, sz // 28)
+        dots    = "".join(
+            f'<circle cx="{col*spacing + spacing//2}" cy="{row*spacing + spacing//2}" r="{r}" fill="white" opacity="0.55"/>'
+            for row in range(4) for col in range(5)
+        )
+        return f'<svg width="{sz}" height="{sz//1.25:.0f}" viewBox="0 0 {sz} {int(sz/1.25)}" xmlns="http://www.w3.org/2000/svg">{dots}</svg>'
+
+    # 3 photos with white borders on blue background
+    photos_html = "".join(
+        f'<div style="flex:1;height:{photo_h}px;border:{border_w}px solid white;overflow:hidden;flex-shrink:0">'
+        f'<div style="width:100%;height:100%;background:url(\'{html_escape(r["url"])}\') center/cover no-repeat"></div>'
+        f'</div>'
+        for r in room_photos[:3]
+    )
+
+    # 3×2 checkmark feature grid
+    feats = list(amenities[:6])
+    while len(feats) < 6:
+        feats.append("")
+    feat_items = "".join(
+        f'<div style="display:flex;align-items:center;gap:8px;flex:0 0 30%;min-width:0">'
+        f'<div style="width:{circ_sz}px;height:{circ_sz}px;border-radius:50%;background:{theme["primary"]};'
+        f'display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{check_icon}" height="{check_icon}" viewBox="0 0 24 24" fill="white">'
+        f'<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>'
+        f'<span style="font-size:{feat_px}px;color:{theme["text_dark"]};font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'
+        f'{html_escape(str(a))}</span></div>'
+        for a in feats if a
+    )
+
+    # Concession line inside price card
+    concession_line = (
+        f'<div style="font-size:{f["label"]-1}px;color:{theme["accent"]};font-weight:700;'
+        f'letter-spacing:1px;margin-top:4px">{html_escape(concession)}</div>'
+    ) if concession else ""
+
+    # Contact footer items
+    def _contact_col(icon_d: str, label: str, value: str) -> str:
+        return (
+            f'<div style="display:flex;align-items:center;gap:10px">'
+            f'<div style="width:{circ_sz}px;height:{circ_sz}px;border-radius:50%;background:{theme["primary"]};'
+            f'display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+            f'{_svg(icon_d, check_icon, "white")}</div>'
+            f'<div>'
+            f'<div style="font-size:{f["label"]-2}px;color:{theme["text_muted"]};text-transform:uppercase;letter-spacing:1px">{label}</div>'
+            f'<div style="font-size:{f["label"]}px;font-weight:700;color:{theme["text_dark"]}">{value}</div>'
+            f'</div></div>'
+        )
+
+    # Description text: prefer subheadline over about_text for conciseness
+    desc_text = (subheadline or about_text)[:220]
+
+    return f"""<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Poster</title>
+<style>
+*{{margin:0;padding:0;box-sizing:border-box}}
+body{{background:#FFFFFF}}
+.poster{{width:{d['width']}px;height:{d['height']}px;display:flex;flex-direction:column;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif}}
+</style></head><body>
+<div class="poster">
+
+  <!-- ── BLUE TOP SECTION ─────────────────────────────────── -->
+  <div style="background:{theme['primary']};padding:{pad}px {pad}px {gap}px;display:flex;flex-direction:column;gap:{gap}px">
+
+    <!-- Property name + huge availability + dot corners -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between">
+      <div style="flex-shrink:0;padding-top:4px">{_dots(dot_sz)}</div>
+      <div style="text-align:center;flex:1;padding:0 {gap}px">
+        <div style="font-size:{name_size}px;font-weight:700;color:white;letter-spacing:3px;
+          text-transform:uppercase;line-height:1.3">{property_name}</div>
+        <div style="font-size:{avail_size}px;font-weight:900;color:white;letter-spacing:2px;
+          text-transform:uppercase;line-height:0.92;font-family:Georgia,serif">{availability.upper()}</div>
+      </div>
+      <div style="flex-shrink:0;padding-top:4px">{_dots(dot_sz)}</div>
+    </div>
+
+    <!-- 3 photos with white borders -->
+    <div style="display:flex;gap:{photo_gap}px">
+      {photos_html}
+    </div>
+
+    <!-- Centered white price card -->
+    <div style="background:white;align-self:center;padding:{gap}px {pad + gap}px;text-align:center;
+      min-width:40%">
+      <div style="font-size:{f['label']}px;font-weight:700;color:{theme['primary']};
+        text-transform:uppercase;letter-spacing:2.5px">Monthly Rent</div>
+      <div style="font-size:{price_big}px;font-weight:900;color:{theme['primary']};
+        font-family:Georgia,serif;line-height:1.05">{pricing}</div>
+      {concession_line}
+    </div>
+
+  </div>
+
+  <!-- ── WHITE BOTTOM SECTION ─────────────────────────────── -->
+  <div style="flex:1;background:white;display:flex;flex-direction:column;align-items:center;
+    padding:{gap*2}px {pad}px {gap}px;gap:{gap}px;overflow:hidden">
+
+    <!-- HOME FEATURES pill badge -->
+    <div style="background:{theme['primary']};color:white;padding:7px 28px;border-radius:30px;
+      font-size:{f['label']}px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+      flex-shrink:0">Home Features</div>
+
+    <!-- 3×2 feature grid -->
+    <div style="display:flex;flex-wrap:wrap;gap:{gap//2}px {gap*3}px;justify-content:center;
+      width:100%;flex-shrink:0">
+      {feat_items}
+    </div>
+
+    <!-- Description paragraph -->
+    <p style="font-size:{f['body']}px;color:{theme['text_muted']};line-height:1.65;
+      text-align:center;max-width:88%;flex-shrink:0">{desc_text}</p>
+
+    <!-- Rounded pill CTA button -->
+    <div style="background:{theme['primary']};color:white;padding:11px 44px;border-radius:30px;
+      font-size:{f['cta']}px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+      flex-shrink:0">{cta_text}</div>
+
+    <!-- Contact row -->
+    <div style="display:flex;justify-content:center;gap:{pad*2}px;margin-top:auto;
+      width:100%;flex-shrink:0">
+      {_contact_col(_PHONE_D, "Call for more information", phone)}
+      {_contact_col(_GLOB_D,  "Visit our website",         website)}
+    </div>
+
+  </div>
+</div></body></html>"""
+
+
 # ─── Template dispatch ────────────────────────────────────────────────────────
 
 TEMPLATE_FUNCTIONS = [
@@ -847,6 +1014,7 @@ TEMPLATE_FUNCTIONS = [
     template_bold_statement,  # 3: image-top band / two-column content below
     template_framed_card,     # 4: editorial card — premium white layout
     template_gradient_story,  # 5: dark primary panel left / image right
+    template_blue_hero,       # 6: blue hero poster — primary-bg headline + photos + white content
 ]
 
 # ─── Per-lever template map ────────────────────────────────────────────────────
@@ -855,25 +1023,25 @@ TEMPLATE_FUNCTIONS = [
 #
 #  Layouts:  1=classic(text-left/img-right)  2=split(img-left/text-right)
 #            3=bold(img-top/2col)             4=framed-card(editorial)
-#            5=dark-panel(primary-left/img-right)
+#            5=dark-panel(primary-left/img-right)  6=blue-hero-poster
 
 LEVER_TEMPLATE_MAP: Dict[str, List[int]] = {
-    # T1 = welcoming classic   T2 = editorial card    T3 = dark reassurance
-    "move_in_ease":  [1, 4, 5],
-    # T1 = image-left urban    T2 = bold img-top      T3 = dark modern navy
-    "convenience":   [2, 3, 5],
-    # T1 = img-top price-hero  T2 = value classic     T3 = reversed clean
-    "affordability": [3, 1, 2],
+    # T1 = welcoming classic   T2 = editorial card    T3 = blue hero poster
+    "move_in_ease":  [1, 4, 6],
+    # T1 = image-left urban    T2 = bold img-top      T3 = blue hero poster
+    "convenience":   [2, 3, 6],
+    # T1 = img-top price-hero  T2 = value classic     T3 = blue hero poster
+    "affordability": [3, 1, 6],
     # T1 = framed premium      T2 = noir dark panel   T3 = elegant classic
     "luxury":        [4, 5, 1],
-    # T1 = features classic    T2 = social img-left   T3 = editorial card
-    "community":     [1, 2, 4],
+    # T1 = features classic    T2 = social img-left   T3 = blue hero poster
+    "community":     [1, 2, 6],
     # T1 = magazine editorial  T2 = sleek dark        T3 = visual img-top
     "lifestyle":     [4, 5, 3],
     # T1 = bold img-top        T2 = dark urgent       T3 = reversed decisive
     "urgency":       [3, 5, 2],
-    # T1 = trustworthy classic T2 = editorial safe    T3 = family img-left
-    "family_safety": [1, 4, 2],
+    # T1 = trustworthy classic T2 = editorial safe    T3 = blue hero poster
+    "family_safety": [1, 4, 6],
 }
 
 # ─── LLM response parser ──────────────────────────────────────────────────────
@@ -1053,8 +1221,8 @@ async def visual_creator(llm_response, input_data, context):
 
         poster_designs.append(poster_spec)
         concession_note = f" | {concession_det[:30]}" if concession_det else ""
-        layout_names = ["classic", "img-left", "img-top", "editorial", "dark-panel"]
-        layout_label = layout_names[actual_template_idx - 1] if actual_template_idx <= 5 else str(actual_template_idx)
+        layout_names = ["classic", "img-left", "img-top", "editorial", "dark-panel", "blue-hero"]
+        layout_label = layout_names[actual_template_idx - 1] if actual_template_idx <= 6 else str(actual_template_idx)
         logger.info(f"  ✓ Brief {i} → {lever} T{template_num} ({layout_label}) | {beds_baths['beds']} {beds_baths['baths']}{' '+sqft if sqft else ''}{concession_note}")
 
     logger.info(f"✨ Done: {len(poster_designs)} sets × {len(ratio_types)} = {poster_files_saved} PNGs")

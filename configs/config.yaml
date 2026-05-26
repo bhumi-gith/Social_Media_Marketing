@@ -265,17 +265,17 @@ agents:
       move_in_ease (forest green — warm, welcoming, frictionless):
         1 = Classic Panel       White left panel with specs + features list, clean image right. Warm & approachable.
         2 = Editorial Card      Premium card layout with headline + features box + price block. Trustworthy, clear.
-        3 = Dark Reassurance    Dark green panel left, image right. Bold but inviting, best for strong concession offers.
+        3 = Blue Hero Poster    Full-color primary-bg header with huge "FOR RENT" headline + 3 photos + white price card + checkmark features grid. Bold, unmistakable poster format.
 
       convenience (deep navy — modern, urban, efficient):
-        1 = Split Urban         Image left (draws the eye to the property), info panel right. Urban and image-forward.
+        1 = Split Urban         Image left, info panel right. Urban and image-forward.
         2 = Image-Top Bold      Full-width image band at top, two-column content below. Maximum visual impact.
-        3 = Dark Modern         Dark navy panel, gold accents, specs list. Sleek, efficient, professional.
+        3 = Blue Hero Poster    Full-color primary-bg header + 3 photos + checkmark features grid. Strong & direct.
 
       affordability (slate — accessible, value-forward, transparent):
         1 = Price-Dominant      Image top band, price block and value props dominate content area. Price is the hero.
         2 = Value Classic       Text left / image right, features box and price block prominent. Transparent & clear.
-        3 = Reversed Clean      Image left, clean pricing messaging right. Accessible, no-clutter presentation.
+        3 = Blue Hero Poster    Primary-bg headline + centered white MONTHLY RENT card + 3×2 feature checklist. Price clarity front and center.
 
       luxury (near-black + gold — premium, exclusive, aspirational):
         1 = Framed Premium      Editorial card, refined white space, gold rules. Feels like a luxury magazine ad.
@@ -285,7 +285,7 @@ agents:
       community (deep teal — friendly, social, inclusive):
         1 = Community Classic   Full features list prominent — shows all amenities. Welcoming, open.
         2 = Social Image-Lead   Property image left, community benefits panel right. People-forward.
-        3 = Editorial Community Framed card feel with about-section visible. Story-driven, warm.
+        3 = Blue Hero Poster    Bold primary-bg headline + 3 community photos + circular checkmark amenities grid. Festive, inclusive feel.
 
       lifestyle (dark charcoal — curated, aspirational, design-conscious):
         1 = Magazine Editorial  Framed editorial card layout. Feels like a lifestyle magazine spread.
@@ -300,7 +300,7 @@ agents:
       family_safety (deep navy — secure, trustworthy, stable):
         1 = Trustworthy Classic White layout, specs + safety features prominent. Reliable, professional.
         2 = Editorial Safe      Framed card, about-this-property section visible. Reassuring story-telling.
-        3 = Family Image-Lead   Exterior/community image left, safety + school details right.
+        3 = Blue Hero Poster    Bold navy-bg "FOR RENT" header + 3 family-friendly photos + checkmark safety features. Clear, trustworthy, family-poster style.
 
       SELECTION RULES:
       - Read the brief's emotional_lever first — only choose 1, 2, or 3 within that lever's options above
